@@ -802,7 +802,11 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             </div>
           </div>
           <div class="chart-tf" role="tablist" aria-label="Timeframe">
-            <button class="active">1s</button><button>5s</button><button>15s</button><button>1m</button><button>5m</button>
+            <button class="active" data-tf="1000"  data-tf-label="1s"  role="tab">1s</button>
+            <button                data-tf="1500"  data-tf-label="5s"  role="tab">5s</button>
+            <button                data-tf="2500"  data-tf-label="15s" role="tab">15s</button>
+            <button                data-tf="4000"  data-tf-label="1m"  role="tab">1m</button>
+            <button                data-tf="6000"  data-tf-label="5m"  role="tab">5m</button>
           </div>
           <div id="arena-chart"></div>
 
@@ -1165,6 +1169,8 @@ const state = {
   activeSym: 'BTCUSD',
   side: 'buy',
   roundSeconds: 5 * 60,
+  tfMs: 1000, // chart tick interval (1s default)
+  tfLabel: '1s',
   orders: [], // closed-trade history
   instruments: [
     // Indian indices (Groww-style terminal header)
@@ -1332,7 +1338,19 @@ function initArenaChart(){
   });
   loadSymbol(state.activeSym);
   window.addEventListener('resize', ()=>arenaChart.applyOptions({width: el.clientWidth}));
-  setInterval(tickArena, 800);
+  startTickLoop();
+}
+let _tickTimer = null;
+function startTickLoop(){
+  if(_tickTimer) clearInterval(_tickTimer);
+  _tickTimer = setInterval(tickArena, state.tfMs);
+}
+function setTimeframe(ms, label, btn){
+  state.tfMs = ms;
+  state.tfLabel = label;
+  document.querySelectorAll('.chart-tf button').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  startTickLoop();
 }
 function loadSymbol(sym){
   const inst = state.instruments.find(i=>i.sym===sym);
@@ -1417,6 +1435,16 @@ document.querySelectorAll('.list-tab').forEach(b=>{
 document.getElementById('list-search').addEventListener('input', e=>{
   const activeTab = document.querySelector('.list-tab.active').dataset.cat;
   renderList(activeTab, e.target.value);
+});
+
+// Chart timeframe tabs
+document.querySelectorAll('.chart-tf button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const ms = parseInt(b.dataset.tf, 10) || 1000;
+    const label = b.dataset.tfLabel || b.textContent.trim();
+    setTimeframe(ms, label, b);
+    toast(`Timeframe · ${label}`, 'success');
+  });
 });
 
 /* ══════════════════════════════════════════════════════════════
