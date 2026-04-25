@@ -7,9 +7,8 @@
 <meta name="description" content="PitBull Markets — a free, gamified trading simulator. Compete in 5-minute tournaments, climb the leaderboard, and sharpen your trading instincts without risking a cent." />
 <meta name="theme-color" content="#0a0718" />
 
-<!-- Supabase config — replace placeholders with your project URL + anon key -->
-<meta name="pb:supabase-url"  content="__SUPABASE_URL__">
-<meta name="pb:supabase-anon" content="__SUPABASE_ANON_KEY__">
+<!-- PitBull Markets backend — FastAPI + SQLite on Fly.io -->
+<meta name="pb:api-base" content="https://pitbull-backend-rifisgfb.fly.dev">
 
 <!-- PWA manifest (Android/iOS/Windows install) -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -23,9 +22,6 @@
 
 <!-- Lightweight Charts by TradingView (OSS) -->
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
-
-<!-- Supabase JS SDK v2 (UMD — exposes window.supabase) -->
-<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -1175,76 +1171,109 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
 
 <script>
 /* ══════════════════════════════════════════════════════════════
-   Supabase bootstrap
-   Falls back to "demo mode" (mock data, localStorage auth) when
-   project URL / anon key placeholders are not yet filled in.
+   PitBull Markets API client
+   Talks to a FastAPI backend (SQLite + JWT auth) deployed on Fly.io.
+   Auth token persisted in localStorage so login carries across reloads
+   on Android, iOS, and Windows browsers.
    ══════════════════════════════════════════════════════════════ */
-const PB_SB_URL  = (document.querySelector('meta[name="pb:supabase-url"]')?.content || '').trim();
-const PB_SB_ANON = (document.querySelector('meta[name="pb:supabase-anon"]')?.content || '').trim();
-const PB_LIVE    = !!(PB_SB_URL && PB_SB_ANON && !PB_SB_URL.startsWith('__') && !PB_SB_ANON.startsWith('__') && window.supabase);
-const sb         = PB_LIVE ? window.supabase.createClient(PB_SB_URL, PB_SB_ANON, {
-  auth: { persistSession:true, autoRefreshToken:true, storageKey:'pb-sb-auth' }
-}) : null;
-window.pb = { live: PB_LIVE, sb, user: null, profile: null };
+const PB_API = (document.querySelector('meta[name="pb:api-base"]')?.content || '').replace(/\/$/,'').trim();
+const PB_LIVE = !!PB_API;
+const PB_TOKEN_KEY = 'pb-auth-token';
+window.pb = { live: PB_LIVE, user: null, profile: null, token: localStorage.getItem(PB_TOKEN_KEY) };
 
-/* ══════════════════════════════════════════════════════════════
-   Supabase helpers — no-ops in demo mode
-   ══════════════════════════════════════════════════════════════ */
-async function pbSignUp(email, password, handle){
-  if(!PB_LIVE) return { error:{ message:'Demo mode — Supabase not configured.' } };
-  const { data, error } = await sb.auth.signUp({
-    email, password,
-    options:{ data:{ handle, display_name: handle } }
+async function pbApi(path, opts={}){
+  if(!PB_LIVE) throw new Error('API not configured.');
+  const headers = Object.assign({}, opts.headers || {});
+  if(opts.body && !headers['content-type']) headers['content-type'] = 'application/json';
+  if(pb.token) headers['authorization'] = 'Bearer ' + pb.token;
+  const res = await fetch(PB_API + path, {
+    method: opts.method || (opts.body ? 'POST' : 'GET'),
+    headers,
+    body: opts.body ? JSON.stringify(opts.body) : undefined,
   });
-  return { data, error };
+  let data = null;
+  try { data = await res.json(); } catch { /* empty body ok */ }
+  if(!res.ok){
+    let msg = `Request failed (${res.status})`;
+    if(data){
+      if(typeof data.detail === 'string') msg = data.detail;
+      else if(Array.isArray(data.detail) && data.detail.length){
+        // FastAPI validation errors → friendly message
+        const e0 = data.detail[0];
+        const fld = (e0?.loc?.slice(-1)[0]) || 'field';
+        msg = `${fld}: ${e0?.msg || 'invalid'}`;
+      }
+      else if(typeof data.message === 'string') msg = data.message;
+    }
+    const err = new Error(msg);
+    err.status = res.status;
+    throw err;
+  }
+  return data;
+}
+
+async function pbSignUp(email, password, handle){
+  try {
+    const data = await pbApi('/api/auth/signup', { body:{ email, password, handle } });
+    pb.token = data.token; pb.user = data.user; pb.profile = data.user;
+    localStorage.setItem(PB_TOKEN_KEY, pb.token);
+    return { data, error: null };
+  } catch(e){ return { data:null, error:{ message: e.message } }; }
 }
 async function pbSignIn(email, password){
-  if(!PB_LIVE) return { error:{ message:'Demo mode — Supabase not configured.' } };
-  return await sb.auth.signInWithPassword({ email, password });
+  try {
+    const data = await pbApi('/api/auth/login', { body:{ email, password } });
+    pb.token = data.token; pb.user = data.user; pb.profile = data.user;
+    localStorage.setItem(PB_TOKEN_KEY, pb.token);
+    return { data, error: null };
+  } catch(e){ return { data:null, error:{ message: e.message } }; }
 }
 async function pbSignOut(){
-  if(!PB_LIVE) { localStorage.removeItem('pb-signed-in'); return; }
-  await sb.auth.signOut();
+  pb.token = null; pb.user = null; pb.profile = null;
+  localStorage.removeItem(PB_TOKEN_KEY);
 }
 async function pbLoadProfile(){
-  if(!PB_LIVE || !pb.user) return null;
-  const { data } = await sb.from('profiles').select('*').eq('id', pb.user.id).maybeSingle();
-  pb.profile = data;
-  return data;
+  if(!PB_LIVE || !pb.token) return null;
+  try {
+    const u = await pbApi('/api/auth/me');
+    pb.user = u; pb.profile = u;
+    return u;
+  } catch(e){
+    // token invalid — clear it
+    if(e.status === 401) await pbSignOut();
+    return null;
+  }
 }
 async function pbFetchTournaments(){
   if(!PB_LIVE) return null;
-  const { data: tList, error } = await sb.from('tournaments').select('*').order('starts_at', { ascending:true });
-  if(error || !tList) return null;
-  const { data: counts } = await sb.from('tournament_entries').select('tournament_id');
-  const countMap = {};
-  (counts||[]).forEach(r => { countMap[r.tournament_id] = (countMap[r.tournament_id]||0) + 1; });
-  return tList.map(t => ({ ...t, player_count: countMap[t.id] || 0 }));
+  try { return await pbApi('/api/tournaments'); }
+  catch { return null; }
 }
 async function pbJoinTournament(tournamentId){
-  if(!PB_LIVE) return { error:{ message:'Demo mode.' } };
+  if(!PB_LIVE) return { error:{ message:'API not configured.' } };
   if(!pb.user)  return { error:{ message:'Sign in to join.' } };
-  return await sb.from('tournament_entries').insert({
-    tournament_id: tournamentId, player_id: pb.user.id
-  });
+  try {
+    const d = await pbApi(`/api/tournaments/${tournamentId}/join`, { method:'POST', body:{} });
+    return { data: d };
+  } catch(e){ return { error:{ message: e.message, code: e.status } }; }
 }
 async function pbInsertTrade(trade){
   if(!PB_LIVE || !pb.user) return;
-  await sb.from('trades').insert({
-    player_id: pb.user.id,
-    symbol: trade.sym,
-    side: trade.side,
-    size_usd: trade.size,
-    entry_price: trade.entry,
-    exit_price: trade.exit,
-    pnl: trade.pnl
-  });
+  try {
+    await pbApi('/api/trades', { body:{
+      symbol: trade.sym,
+      side:   trade.side,
+      size_usd:    trade.size,
+      entry_price: trade.entry,
+      exit_price:  trade.exit,
+      pnl:         trade.pnl,
+    }});
+  } catch(e){ console.warn('[PitBull] trade record failed:', e.message); }
 }
 async function pbFetchLeaderboard(limit=25){
   if(!PB_LIVE) return null;
-  const { data, error } = await sb.rpc('public_leaderboard', { limit_n: limit });
-  if(error || !data) return null;
-  return data;
+  try { return await pbApi(`/api/leaderboard?limit=${limit}`); }
+  catch { return null; }
 }
 
 /* Update header signed-in state */
@@ -1254,9 +1283,13 @@ function pbRenderAuthChip(){
   if(pb.user){
     const name = pb.profile?.handle || pb.profile?.display_name || pb.user.email?.split('@')[0] || 'player';
     btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:22px;height:22px;border-radius:50%;background:${pb.profile?.avatar_color||'#7c3aed'};display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;">${name.slice(0,2).toUpperCase()}</span>${name}</span>`;
-    btn.onclick = () => {
+    btn.onclick = async () => {
       if(confirm('Sign out of PitBull Markets?')){
-        pbSignOut().then(()=>{ pb.user=null; pb.profile=null; pbRenderAuthChip(); toast('Signed out', 'success'); });
+        await pbSignOut();
+        pbRenderAuthChip();
+        toast('Signed out', 'success');
+        refreshTournsFromDB();
+        renderLeaders();
       }
     };
   } else {
@@ -1265,26 +1298,16 @@ function pbRenderAuthChip(){
   }
 }
 
-/* Init Supabase session + subscribe to auth changes */
+/* Init session + restore from saved token */
 async function pbInit(){
   if(!PB_LIVE){
-    console.info('[PitBull] Demo mode — Supabase keys not set.');
+    console.info('[PitBull] Demo mode — API not configured.');
     return;
   }
-  const { data: { session } } = await sb.auth.getSession();
-  if(session?.user){
-    pb.user = session.user;
+  if(pb.token){
     await pbLoadProfile();
   }
   pbRenderAuthChip();
-  sb.auth.onAuthStateChange(async (event, session) => {
-    pb.user = session?.user || null;
-    if(pb.user) await pbLoadProfile();
-    else pb.profile = null;
-    pbRenderAuthChip();
-    if(event === 'SIGNED_IN')  { refreshTournsFromDB(); renderLeaders(); }
-    if(event === 'SIGNED_OUT') { refreshTournsFromDB(); renderLeaders(); }
-  });
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1965,7 +1988,7 @@ async function pbAuthSubmit(ev){
 
   if(!PB_LIVE){
     btn.disabled = false; btn.textContent = origTxt;
-    pbAuthError('Demo mode — Supabase not configured. Add your project URL + anon key in the <head> meta tags to enable real accounts.');
+    pbAuthError('Backend not configured.');
     return false;
   }
   try {
@@ -1977,16 +2000,17 @@ async function pbAuthSubmit(ev){
       }
       const { data, error } = await pbSignUp(email, pw, handle);
       if(error){ pbAuthError(error.message); btn.disabled=false; btn.textContent=origTxt; return false; }
-      if(!data.session){
-        toast('Check your email to confirm your account.', 'success');
-        closeModal('auth-modal');
-      } else {
-        toast(`Welcome, ${handle}!`, 'success');
-        closeModal('auth-modal');
-      }
+      pbRenderAuthChip();
+      refreshTournsFromDB();
+      renderLeaders();
+      toast(`Welcome, ${handle}!`, 'success');
+      closeModal('auth-modal');
     } else {
       const { error } = await pbSignIn(email, pw);
       if(error){ pbAuthError(error.message); btn.disabled=false; btn.textContent=origTxt; return false; }
+      pbRenderAuthChip();
+      refreshTournsFromDB();
+      renderLeaders();
       toast('Signed in · paper account ready', 'success');
       closeModal('auth-modal');
     }
@@ -1998,12 +2022,7 @@ async function pbAuthSubmit(ev){
   return false;
 }
 async function pbForgotPassword(){
-  const email = document.getElementById('auth-email').value.trim();
-  if(!email){ pbAuthError('Enter your email first.'); return; }
-  if(!PB_LIVE){ pbAuthError('Demo mode — cannot send reset email.'); return; }
-  const { error } = await sb.auth.resetPasswordForEmail(email);
-  if(error) pbAuthError(error.message);
-  else toast('Password reset email sent (if account exists).', 'success');
+  toast('Password reset is coming soon — please contact support.', 'success');
 }
 
 /* ══════════════════════════════════════════════════════════════
