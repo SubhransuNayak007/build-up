@@ -7,12 +7,25 @@
 <meta name="description" content="PitBull Markets — a free, gamified trading simulator. Compete in 5-minute tournaments, climb the leaderboard, and sharpen your trading instincts without risking a cent." />
 <meta name="theme-color" content="#0a0718" />
 
+<!-- Supabase config — replace placeholders with your project URL + anon key -->
+<meta name="pb:supabase-url"  content="__SUPABASE_URL__">
+<meta name="pb:supabase-anon" content="__SUPABASE_ANON_KEY__">
+
+<!-- PWA manifest (Android/iOS/Windows install) -->
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&family=Space+Grotesk:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 
 <!-- Lightweight Charts by TradingView (OSS) -->
 <script src="https://unpkg.com/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
+
+<!-- Supabase JS SDK v2 (UMD — exposes window.supabase) -->
+<script src="https://unpkg.com/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;}
@@ -1143,14 +1156,16 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       <button class="active" data-authtab="login" role="tab">Log in</button>
       <button data-authtab="signup" role="tab">Sign up</button>
     </div>
-    <form onsubmit="event.preventDefault();toast('Signed in — paper account ready', 'success');closeModal('auth-modal');">
-      <div class="field"><label>Email</label><input type="email" required placeholder="you@example.com" autocomplete="email"></div>
-      <div class="field"><label>Password</label><input type="password" required placeholder="••••••••" autocomplete="current-password"></div>
+    <form id="auth-form" onsubmit="return pbAuthSubmit(event);">
+      <div class="field" id="auth-handle-field" style="display:none;"><label>Username</label><input id="auth-handle" type="text" placeholder="e.g. scalp_lord" autocomplete="username" minlength="3" maxlength="24" pattern="[a-zA-Z0-9_]+"></div>
+      <div class="field"><label>Email</label><input id="auth-email" type="email" required placeholder="you@example.com" autocomplete="email"></div>
+      <div class="field"><label>Password</label><input id="auth-password" type="password" required placeholder="••••••••" autocomplete="current-password" minlength="6"></div>
+      <div id="auth-error" style="display:none;color:var(--r1);font-size:13px;margin:4px 0 8px;padding:8px 10px;background:rgba(255,79,112,0.08);border:1px solid rgba(255,79,112,0.3);border-radius:8px;"></div>
       <div class="auth-extras">
         <label style="display:flex;align-items:center;gap:6px;cursor:pointer;"><input type="checkbox" checked style="accent-color:var(--p1);">Remember me</label>
-        <a href="#">Forgot password?</a>
+        <a href="#" onclick="event.preventDefault();pbForgotPassword();">Forgot password?</a>
       </div>
-      <button type="submit" class="modal-cta">Log in</button>
+      <button type="submit" class="modal-cta" id="auth-submit">Log in</button>
     </form>
   </div>
 </div>
@@ -1159,6 +1174,119 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
 
 <script>
+/* ══════════════════════════════════════════════════════════════
+   Supabase bootstrap
+   Falls back to "demo mode" (mock data, localStorage auth) when
+   project URL / anon key placeholders are not yet filled in.
+   ══════════════════════════════════════════════════════════════ */
+const PB_SB_URL  = (document.querySelector('meta[name="pb:supabase-url"]')?.content || '').trim();
+const PB_SB_ANON = (document.querySelector('meta[name="pb:supabase-anon"]')?.content || '').trim();
+const PB_LIVE    = !!(PB_SB_URL && PB_SB_ANON && !PB_SB_URL.startsWith('__') && !PB_SB_ANON.startsWith('__') && window.supabase);
+const sb         = PB_LIVE ? window.supabase.createClient(PB_SB_URL, PB_SB_ANON, {
+  auth: { persistSession:true, autoRefreshToken:true, storageKey:'pb-sb-auth' }
+}) : null;
+window.pb = { live: PB_LIVE, sb, user: null, profile: null };
+
+/* ══════════════════════════════════════════════════════════════
+   Supabase helpers — no-ops in demo mode
+   ══════════════════════════════════════════════════════════════ */
+async function pbSignUp(email, password, handle){
+  if(!PB_LIVE) return { error:{ message:'Demo mode — Supabase not configured.' } };
+  const { data, error } = await sb.auth.signUp({
+    email, password,
+    options:{ data:{ handle, display_name: handle } }
+  });
+  return { data, error };
+}
+async function pbSignIn(email, password){
+  if(!PB_LIVE) return { error:{ message:'Demo mode — Supabase not configured.' } };
+  return await sb.auth.signInWithPassword({ email, password });
+}
+async function pbSignOut(){
+  if(!PB_LIVE) { localStorage.removeItem('pb-signed-in'); return; }
+  await sb.auth.signOut();
+}
+async function pbLoadProfile(){
+  if(!PB_LIVE || !pb.user) return null;
+  const { data } = await sb.from('profiles').select('*').eq('id', pb.user.id).maybeSingle();
+  pb.profile = data;
+  return data;
+}
+async function pbFetchTournaments(){
+  if(!PB_LIVE) return null;
+  const { data: tList, error } = await sb.from('tournaments').select('*').order('starts_at', { ascending:true });
+  if(error || !tList) return null;
+  const { data: counts } = await sb.from('tournament_entries').select('tournament_id');
+  const countMap = {};
+  (counts||[]).forEach(r => { countMap[r.tournament_id] = (countMap[r.tournament_id]||0) + 1; });
+  return tList.map(t => ({ ...t, player_count: countMap[t.id] || 0 }));
+}
+async function pbJoinTournament(tournamentId){
+  if(!PB_LIVE) return { error:{ message:'Demo mode.' } };
+  if(!pb.user)  return { error:{ message:'Sign in to join.' } };
+  return await sb.from('tournament_entries').insert({
+    tournament_id: tournamentId, player_id: pb.user.id
+  });
+}
+async function pbInsertTrade(trade){
+  if(!PB_LIVE || !pb.user) return;
+  await sb.from('trades').insert({
+    player_id: pb.user.id,
+    symbol: trade.sym,
+    side: trade.side,
+    size_usd: trade.size,
+    entry_price: trade.entry,
+    exit_price: trade.exit,
+    pnl: trade.pnl
+  });
+}
+async function pbFetchLeaderboard(limit=25){
+  if(!PB_LIVE) return null;
+  const { data, error } = await sb.rpc('public_leaderboard', { limit_n: limit });
+  if(error || !data) return null;
+  return data;
+}
+
+/* Update header signed-in state */
+function pbRenderAuthChip(){
+  const btn = document.getElementById('btn-signin');
+  if(!btn) return;
+  if(pb.user){
+    const name = pb.profile?.handle || pb.profile?.display_name || pb.user.email?.split('@')[0] || 'player';
+    btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:22px;height:22px;border-radius:50%;background:${pb.profile?.avatar_color||'#7c3aed'};display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;">${name.slice(0,2).toUpperCase()}</span>${name}</span>`;
+    btn.onclick = () => {
+      if(confirm('Sign out of PitBull Markets?')){
+        pbSignOut().then(()=>{ pb.user=null; pb.profile=null; pbRenderAuthChip(); toast('Signed out', 'success'); });
+      }
+    };
+  } else {
+    btn.textContent = 'Sign in';
+    btn.onclick = () => openModal('auth-modal');
+  }
+}
+
+/* Init Supabase session + subscribe to auth changes */
+async function pbInit(){
+  if(!PB_LIVE){
+    console.info('[PitBull] Demo mode — Supabase keys not set.');
+    return;
+  }
+  const { data: { session } } = await sb.auth.getSession();
+  if(session?.user){
+    pb.user = session.user;
+    await pbLoadProfile();
+  }
+  pbRenderAuthChip();
+  sb.auth.onAuthStateChange(async (event, session) => {
+    pb.user = session?.user || null;
+    if(pb.user) await pbLoadProfile();
+    else pb.profile = null;
+    pbRenderAuthChip();
+    if(event === 'SIGNED_IN')  { refreshTournsFromDB(); renderLeaders(); }
+    if(event === 'SIGNED_OUT') { refreshTournsFromDB(); renderLeaders(); }
+  });
+}
+
 /* ══════════════════════════════════════════════════════════════
    State
    ══════════════════════════════════════════════════════════════ */
@@ -1556,10 +1684,12 @@ function closePosition(id){
   const pnl = positionPnL(p);
   state.balance += p.size + pnl;
   state.positions = state.positions.filter(x=>x.id!==id);
-  state.orders.unshift({
+  const order = {
     id: p.id, sym:p.sym, side:p.side, size:p.size, entry:p.entry, exit:p.mark, pnl,
     at: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
-  });
+  };
+  state.orders.unshift(order);
+  pbInsertTrade(order);
   updatePositions();
   renderOrders();
   toast(`Closed ${p.sym} · ${pnl>=0?'+':''}${fmtUSD(pnl)}`, pnl>=0?'success':'error');
@@ -1572,10 +1702,12 @@ function closeAllPositions(){
     const pnl = positionPnL(p);
     total += pnl;
     state.balance += p.size + pnl;
-    state.orders.unshift({
+    const order = {
       id:p.id, sym:p.sym, side:p.side, size:p.size, entry:p.entry, exit:p.mark, pnl,
       at: new Date().toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
-    });
+    };
+    state.orders.unshift(order);
+    pbInsertTrade(order);
   });
   state.positions = [];
   updatePositions();
@@ -1805,9 +1937,74 @@ document.querySelectorAll('.auth-tabs button').forEach(b=>{
   b.addEventListener('click', ()=>{
     document.querySelectorAll('.auth-tabs button').forEach(x=>x.classList.remove('active'));
     b.classList.add('active');
-    document.querySelector('.modal-cta').textContent = b.dataset.authtab==='signup' ? 'Create account' : 'Log in';
+    const isSignup = b.dataset.authtab==='signup';
+    document.getElementById('auth-submit').textContent = isSignup ? 'Create account' : 'Log in';
+    document.getElementById('auth-handle-field').style.display = isSignup ? '' : 'none';
+    document.getElementById('auth-handle').required = isSignup;
+    document.getElementById('auth-password').autocomplete = isSignup ? 'new-password' : 'current-password';
+    pbAuthError('');
   });
 });
+
+function pbAuthError(msg){
+  const el = document.getElementById('auth-error');
+  if(!el) return;
+  if(!msg){ el.style.display='none'; el.textContent=''; }
+  else    { el.style.display='';    el.textContent=msg; }
+}
+async function pbAuthSubmit(ev){
+  ev.preventDefault();
+  const mode   = document.querySelector('.auth-tabs button.active').dataset.authtab;
+  const email  = document.getElementById('auth-email').value.trim();
+  const pw     = document.getElementById('auth-password').value;
+  const btn    = document.getElementById('auth-submit');
+  btn.disabled = true;
+  const origTxt = btn.textContent;
+  btn.textContent = mode==='signup' ? 'Creating…' : 'Signing in…';
+  pbAuthError('');
+
+  if(!PB_LIVE){
+    btn.disabled = false; btn.textContent = origTxt;
+    pbAuthError('Demo mode — Supabase not configured. Add your project URL + anon key in the <head> meta tags to enable real accounts.');
+    return false;
+  }
+  try {
+    if(mode === 'signup'){
+      const handle = document.getElementById('auth-handle').value.trim();
+      if(!/^[a-zA-Z0-9_]{3,24}$/.test(handle)){
+        pbAuthError('Username: 3–24 chars, letters/numbers/underscore only.');
+        btn.disabled=false; btn.textContent=origTxt; return false;
+      }
+      const { data, error } = await pbSignUp(email, pw, handle);
+      if(error){ pbAuthError(error.message); btn.disabled=false; btn.textContent=origTxt; return false; }
+      if(!data.session){
+        toast('Check your email to confirm your account.', 'success');
+        closeModal('auth-modal');
+      } else {
+        toast(`Welcome, ${handle}!`, 'success');
+        closeModal('auth-modal');
+      }
+    } else {
+      const { error } = await pbSignIn(email, pw);
+      if(error){ pbAuthError(error.message); btn.disabled=false; btn.textContent=origTxt; return false; }
+      toast('Signed in · paper account ready', 'success');
+      closeModal('auth-modal');
+    }
+  } catch(e){
+    pbAuthError(e.message || 'Unexpected error.');
+  } finally {
+    btn.disabled = false; btn.textContent = origTxt;
+  }
+  return false;
+}
+async function pbForgotPassword(){
+  const email = document.getElementById('auth-email').value.trim();
+  if(!email){ pbAuthError('Enter your email first.'); return; }
+  if(!PB_LIVE){ pbAuthError('Demo mode — cannot send reset email.'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email);
+  if(error) pbAuthError(error.message);
+  else toast('Password reset email sent (if account exists).', 'success');
+}
 
 /* ══════════════════════════════════════════════════════════════
    Tournaments + Leaderboard mock data
@@ -1820,30 +2017,107 @@ const tourns = [
   {type:'public',   title:'FX Face-off',         prize:'200 tokens',   entry:'Free', players:'66/100', timer:'Live · 1:40 left', color:'linear-gradient(135deg,#ffd55a,#ff4f70)'},
   {type:'public',   title:'Rookie Rumble',       prize:'150 tokens',   entry:'Free', players:'91/200', timer:'Starts in 22m', color:'linear-gradient(135deg,#22d3ee,#10e39b)'},
 ];
-function renderTourns(){
-  document.getElementById('tourn-grid').innerHTML = tourns.map(t=>`
+function tournTimerText(t){
+  const now = Date.now();
+  const starts = t.starts_at ? new Date(t.starts_at).getTime() : now;
+  if(t.status==='live')  return 'Live';
+  if(t.status==='ended') return 'Ended';
+  const diffMs = starts - now;
+  if(diffMs <= 0) return 'Starting';
+  const mins = Math.round(diffMs/60000);
+  if(mins < 60) return `Starts in ${mins}m`;
+  const hrs = Math.round(mins/60);
+  if(hrs < 48)  return `Starts in ${hrs}h`;
+  return `Starts ${new Date(starts).toLocaleDateString()}`;
+}
+function renderTournsFromRows(rows){
+  const colors = ['linear-gradient(135deg,#22d3ee,#7c3aed)','linear-gradient(135deg,#10e39b,#22d3ee)','linear-gradient(135deg,#ffd55a,#f97316)','linear-gradient(135deg,#a855f7,#ff4f70)'];
+  const grid = document.getElementById('tourn-grid');
+  if(!grid) return;
+  grid.innerHTML = rows.map((t,idx)=>{
+    const type  = t.mode || 'public';
+    const prize = t.prize_pool_usd ? '$' + Number(t.prize_pool_usd).toLocaleString() : 'Bragging rights';
+    const entry = t.entry_tokens > 0 ? `${t.entry_tokens} tokens` : 'Free';
+    const players = `${t.player_count ?? 0}/${t.max_players ?? 100}`;
+    const blurb = type==='private' ? 'A private room among invited friends.'
+                : type==='solo'    ? 'Practice solo — same replay, same rules.'
+                :                    'Open to everyone. Fair replay, same start balance.';
+    const joinId = t.id || ('mock-'+idx);
+    const joinLabel = t.mode==='private' ? 'Request invite' : (t.status==='ended' ? 'Ended' : 'Join →');
+    const disabled = t.status==='ended' ? 'disabled' : '';
+    return `
     <article class="tourn">
       <div class="tourn-head">
-        <span class="tourn-type ${t.type}">${t.type}</span>
-        <div style="color:var(--t3);font-size:11px;font-family:var(--mono);">${t.timer}</div>
+        <span class="tourn-type ${type}">${type}</span>
+        <div style="color:var(--t3);font-size:11px;font-family:var(--mono);">${tournTimerText(t)}</div>
       </div>
       <div>
-        <h3>${t.title}</h3>
-        <p>${t.type==='private'?'A private room among invited friends.':t.type==='featured'?'Flagship weekly event — biggest pool of the day.':'Open to everyone. Fair replay, same start balance.'}</p>
+        <h3>${t.name || t.title}</h3>
+        <p>${blurb}</p>
       </div>
       <div class="tourn-stats">
-        <div class="t-s"><b>${t.prize}</b><small>Prize</small></div>
-        <div class="t-s"><b>${t.entry}</b><small>Entry</small></div>
-        <div class="t-s"><b>${t.players}</b><small>Players</small></div>
+        <div class="t-s"><b>${prize}</b><small>Prize</small></div>
+        <div class="t-s"><b>${entry}</b><small>Entry</small></div>
+        <div class="t-s"><b>${players}</b><small>Players</small></div>
       </div>
       <div class="tourn-foot">
-        <div class="tourn-avatars">${[1,2,3,4].map((_,i)=>`<span style="background:${['#22d3ee','#a855f7','#10e39b','#ffd55a'][i]};">${'UMTF'[i]}</span>`).join('')}</div>
-        <button class="btn btn-primary" type="button" onclick="joinTourn('${t.title.replace(/'/g,'')}')">Join →</button>
+        <div class="tourn-avatars">${[0,1,2,3].map(i=>`<span style="background:${['#22d3ee','#a855f7','#10e39b','#ffd55a'][i]};">${'UMTF'[i]}</span>`).join('')}</div>
+        <button class="btn btn-primary" type="button" onclick="joinTourn('${joinId}','${(t.name||t.title||'').replace(/'/g,'')}')" ${disabled}>${joinLabel}</button>
       </div>
-    </article>
-  `).join('');
+    </article>`;
+  }).join('');
 }
-window.joinTourn = (name)=>{
+function renderTourns(){
+  // Default (demo / fallback) render from mock array
+  renderTournsFromRows(tourns.map(t => ({
+    id: 'mock-'+t.title.replace(/\s/g,'-'),
+    name: t.title,
+    mode: t.type==='featured' ? 'public' : t.type,
+    prize_pool_usd: null, // show original prize string via override below
+    entry_tokens: t.entry==='Free' ? 0 : parseInt(t.entry, 10) || 0,
+    max_players: parseInt((t.players.split('/')[1]||'100'), 10),
+    player_count: parseInt(t.players.split('/')[0], 10) || 0,
+    status: t.timer.startsWith('Live') ? 'live' : 'upcoming',
+    starts_at: null,
+    _demoPrize: t.prize,
+    _demoTimer: t.timer,
+  })));
+  // Patch prize labels for demo (prize_pool_usd is null)
+  document.querySelectorAll('#tourn-grid article').forEach((card, i) => {
+    const src = tourns[i]; if(!src) return;
+    const prizeCell = card.querySelector('.tourn-stats .t-s:first-child b');
+    if(prizeCell) prizeCell.textContent = src.prize;
+    const timerCell = card.querySelector('.tourn-head div:last-child');
+    if(timerCell) timerCell.textContent = src.timer;
+  });
+}
+async function refreshTournsFromDB(){
+  if(!PB_LIVE){ renderTourns(); return; }
+  const rows = await pbFetchTournaments();
+  if(rows && rows.length){ renderTournsFromRows(rows); }
+  else                   { renderTourns(); }
+}
+window.joinTourn = async (id, name)=>{
+  if(PB_LIVE){
+    if(!pb.user){
+      openModal('auth-modal');
+      toast(`Sign in to join "${name}"`, 'success');
+      return;
+    }
+    const { error } = await pbJoinTournament(id);
+    if(error){
+      if((error.code||'') === '23505' || (error.message||'').toLowerCase().includes('duplicate')){
+        toast(`Already joined "${name}"`, 'success');
+      } else {
+        toast(error.message || 'Join failed', 'error');
+      }
+    } else {
+      toast(`Joined "${name}"`, 'success');
+      refreshTournsFromDB();
+    }
+    return;
+  }
+  // Demo-mode fallback
   if(!localStorage.getItem('pb-signed-in')){
     openModal('auth-modal');
     toast('Sign in to join "' + name + '"', 'success');
@@ -1852,6 +2126,7 @@ window.joinTourn = (name)=>{
   }
 };
 renderTourns();
+refreshTournsFromDB();
 
 const leaders = [
   {name:'ch0pS_tacticks', pnl:+48213.22, wr:72, tr:418, streak:'W12', color:'#ffd55a'},
@@ -1865,18 +2140,31 @@ const leaders = [
   {name:'frost_bull',      pnl:+17012.63, wr:55, tr:421, streak:'W1',  color:'#10e39b'},
   {name:'daybreak_dani',   pnl:+15221.34, wr:53, tr:289, streak:'L1',  color:'#a855f7'},
 ];
-function renderLeaders(){
-  document.getElementById('lb-body').innerHTML = leaders.map((p,i)=>{
+function renderLeaderRows(rows){
+  document.getElementById('lb-body').innerHTML = rows.map((p,i)=>{
     const rankCls = i===0?'r1':i===1?'r2':i===2?'r3':'rx';
+    const color = p.color || p.avatar_color || '#7c3aed';
+    const name  = p.name  || p.handle || p.display_name || 'player';
+    const pnl   = Number(p.pnl ?? p.total_pnl ?? 0);
+    const wr    = p.wr    ?? Math.min(99, Math.max(0, Math.round(50 + (pnl/10000))));
+    const tr    = p.tr    ?? p.trade_count ?? 0;
+    const streak= p.streak ?? (pnl>=0 ? `W${Math.min(9,Math.floor(pnl/5000)+1)}` : `L${Math.min(5,Math.ceil(-pnl/5000))}`);
     return `<tr>
       <td><span class="lb-rank ${rankCls}">${i+1}</span></td>
-      <td><span class="lb-name"><span class="av" style="background:${p.color}">${p.name.slice(0,2).toUpperCase()}</span>${p.name}</span></td>
-      <td class="lb-pnl ${p.pnl>=0?'up':'down'}">${p.pnl>=0?'+':''}${fmtUSD(p.pnl)}</td>
-      <td>${p.wr}%</td>
-      <td class="lb-trades">${p.tr}</td>
-      <td style="color:${p.streak.startsWith('W')?'var(--g1)':'var(--r1)'};">${p.streak}</td>
+      <td><span class="lb-name"><span class="av" style="background:${color}">${name.slice(0,2).toUpperCase()}</span>${name}</span></td>
+      <td class="lb-pnl ${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${fmtUSD(pnl)}</td>
+      <td>${wr}%</td>
+      <td class="lb-trades">${tr}</td>
+      <td style="color:${String(streak).startsWith('W')?'var(--g1)':'var(--r1)'};">${streak}</td>
     </tr>`;
   }).join('');
+}
+async function renderLeaders(){
+  if(PB_LIVE){
+    const rows = await pbFetchLeaderboard(25);
+    if(rows && rows.length){ renderLeaderRows(rows); return; }
+  }
+  renderLeaderRows(leaders);
 }
 renderLeaders();
 
@@ -1904,6 +2192,20 @@ renderBalancePane();
 updateDepth(true);
 // Refresh depth at a visible cadence even when no tick has happened yet
 setInterval(()=>{ if(document.querySelector('.term-pane.active')?.dataset.pane==='depth') updateDepth(); }, 1500);
+
+/* Supabase session + live data */
+pbInit();
+if(PB_LIVE){
+  // Refresh tournaments / leaderboard periodically
+  setInterval(() => { refreshTournsFromDB(); renderLeaders(); }, 45000);
+}
+
+/* PWA: register service worker so the app is installable on Android / iOS / Windows */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => console.warn('[PitBull] SW register failed', err));
+  });
+}
 
 /* Show welcome once per browser */
 if(!localStorage.getItem('pb-welcome-seen')){
