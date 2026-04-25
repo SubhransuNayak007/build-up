@@ -89,6 +89,12 @@ button{font-family:inherit;cursor:pointer;border:none;background:none;color:inhe
 input,select,textarea{font-family:inherit;color:inherit;}
 svg{display:block;}
 
+/* ──────────── Floating particles backdrop ──────────── */
+#bg-particles{
+  position:fixed;inset:0;z-index:-1;pointer-events:none;
+  width:100vw;height:100vh;
+}
+
 /* ──────────── Ambient background ──────────── */
 .ambient{
   position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none;
@@ -615,6 +621,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
   <div class="orb o2"></div>
   <div class="orb o3"></div>
 </div>
+<canvas id="bg-particles" aria-hidden="true"></canvas>
 
 <!-- ══════════ Header ══════════ -->
 <div class="nav-outer">
@@ -1170,6 +1177,114 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
 
 <script>
+/* ══════════════════════════════════════════════════════════════
+   Floating particles backdrop (Antigravity-style)
+   Lightweight canvas: ~80 dots desktop / ~40 mobile, drift + glow.
+   Respects prefers-reduced-motion.
+   ══════════════════════════════════════════════════════════════ */
+(function initParticles(){
+  const cv = document.getElementById('bg-particles');
+  if(!cv) return;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if(reduced) return; // honour OS-level setting
+
+  const ctx = cv.getContext('2d', { alpha: true });
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const isMobile = () => window.innerWidth < 720;
+  const palette = [
+    { r:124, g:58,  b:237 },  // violet
+    { r:34,  g:211, b:238 },  // cyan
+    { r:168, g:85,  b:247 },  // purple
+    { r:255, g:213, b:90  },  // amber
+    { r:16,  g:227, b:155 },  // green
+  ];
+
+  let W = 0, H = 0;
+  function resize(){
+    W = window.innerWidth;
+    H = window.innerHeight;
+    cv.width  = Math.floor(W * dpr);
+    cv.height = Math.floor(H * dpr);
+    cv.style.width  = W + 'px';
+    cv.style.height = H + 'px';
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  resize();
+  window.addEventListener('resize', () => { resize(); spawn(); });
+
+  let parts = [];
+  function spawn(){
+    const n = isMobile() ? 38 : 90;
+    parts = new Array(n).fill(0).map(() => {
+      const c = palette[(Math.random() * palette.length) | 0];
+      return {
+        x: Math.random() * W,
+        y: Math.random() * H,
+        r: 0.8 + Math.random() * 1.6,
+        // slow upward + sideways drift (smooth float)
+        vx: (Math.random() - 0.5) * 0.18,
+        vy: -(0.05 + Math.random() * 0.18),
+        // gentle sinusoid sway
+        a: Math.random() * Math.PI * 2,
+        ax: 0.0008 + Math.random() * 0.0014,
+        sway: 0.25 + Math.random() * 0.5,
+        col: c,
+        alpha: 0.35 + Math.random() * 0.5,
+        glow: 6 + Math.random() * 10,
+      };
+    });
+  }
+  spawn();
+
+  // Subtle parallax with cursor
+  let mx = 0, my = 0, tx = 0, ty = 0;
+  window.addEventListener('mousemove', (e) => {
+    mx = (e.clientX / W - 0.5) * 12;
+    my = (e.clientY / H - 0.5) * 12;
+  }, { passive:true });
+
+  let t0 = performance.now();
+  let visible = !document.hidden;
+  document.addEventListener('visibilitychange', () => { visible = !document.hidden; if(visible) t0 = performance.now(); });
+
+  function frame(now){
+    requestAnimationFrame(frame);
+    if(!visible) return;
+    const dt = Math.min(48, now - t0); // cap dt to avoid huge jumps after tab unfocus
+    t0 = now;
+
+    // ease parallax
+    tx += (mx - tx) * 0.05;
+    ty += (my - ty) * 0.05;
+
+    ctx.clearRect(0, 0, W, H);
+
+    for(let i = 0, l = parts.length; i < l; i++){
+      const p = parts[i];
+      p.a += p.ax * dt;
+      p.x += (p.vx + Math.cos(p.a) * 0.0005 * p.sway * dt) * (dt / 16);
+      p.y += p.vy * (dt / 16);
+
+      // wrap edges (so particles continuously float upward and respawn at bottom)
+      if(p.y < -10){ p.y = H + 10; p.x = Math.random() * W; }
+      if(p.x < -20) p.x = W + 20;
+      if(p.x > W + 20) p.x = -20;
+
+      const px = p.x + tx * (p.r * 0.4);
+      const py = p.y + ty * (p.r * 0.4);
+
+      ctx.shadowBlur = p.glow;
+      ctx.shadowColor = `rgba(${p.col.r},${p.col.g},${p.col.b},${p.alpha})`;
+      ctx.fillStyle   = `rgba(${p.col.r},${p.col.g},${p.col.b},${p.alpha})`;
+      ctx.beginPath();
+      ctx.arc(px, py, p.r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+  }
+  requestAnimationFrame((t) => { t0 = t; frame(t); });
+})();
+
 /* ══════════════════════════════════════════════════════════════
    PitBull Markets API client
    Talks to a FastAPI backend (SQLite + JWT auth) deployed on Fly.io.
