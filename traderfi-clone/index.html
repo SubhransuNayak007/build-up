@@ -2333,13 +2333,7 @@ async function renderLeaders(){
 }
 renderLeaders();
 
-/* Live counters */
-setInterval(()=>{
-  const p = Math.floor(2300 + Math.random()*400);
-  const t = Math.floor(35 + Math.random()*20);
-  ['live-players','s-players','w-players'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent = p.toLocaleString(); });
-  ['live-tourns','s-tourns','w-tourns'].forEach(id=>{ const e=document.getElementById(id); if(e) e.textContent = t; });
-}, 3500);
+/* Live counters are driven by /api/stats (pbRefreshStats) — no fake jitter. */
 
 /* Year */
 document.getElementById('year').textContent = new Date().getFullYear();
