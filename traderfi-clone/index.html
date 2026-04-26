@@ -148,6 +148,45 @@ svg{display:block;}
 .section-lead{color:var(--t2);font-size:17px;max-width:640px;}
 
 /* ──────────── Header ──────────── */
+/* ──────────── Simulation disclaimer banner ──────────── */
+.sim-disclaimer{
+  position:sticky;top:0;z-index:70;display:flex;align-items:center;gap:10px;
+  padding:8px 14px;font-size:12px;line-height:1.4;
+  background:linear-gradient(90deg,rgba(255,180,40,0.18),rgba(124,58,237,0.18));
+  border-bottom:1px solid rgba(255,180,40,0.35);
+  color:#ffe7b2;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+}
+.sim-disclaimer.dismissed{display:none;}
+.sim-disclaimer .sd-pill{
+  font-size:10px;font-weight:800;letter-spacing:0.18em;background:#ffd55a;color:#1a0f00;
+  padding:3px 8px;border-radius:999px;flex:0 0 auto;
+}
+.sim-disclaimer .sd-text{flex:1;color:#ffe7b2;}
+.sim-disclaimer .sd-text b{color:#fff;}
+.sim-disclaimer .sd-close{
+  flex:0 0 auto;background:transparent;color:#ffe7b2;font-size:20px;line-height:1;
+  width:28px;height:28px;border-radius:50%;cursor:pointer;
+}
+.sim-disclaimer .sd-close:hover{background:rgba(255,255,255,0.08);color:#fff;}
+@media (max-width:640px){
+  .sim-disclaimer{padding:8px 10px;font-size:11px;gap:8px;}
+  .sim-disclaimer .sd-text{font-size:11px;}
+}
+
+/* Trade-feedback flash (full-page tint on buy/sell/close) */
+@keyframes pb-flash {
+  0%   { opacity:0; }
+  18%  { opacity:0.55; }
+  100% { opacity:0; }
+}
+.pb-flash{
+  position:fixed;inset:0;z-index:180;pointer-events:none;opacity:0;
+  animation: pb-flash 600ms ease-out forwards;
+}
+.pb-flash.up   { background:radial-gradient(circle at 50% 50%, rgba(16,227,155,0.55), transparent 60%); }
+.pb-flash.down { background:radial-gradient(circle at 50% 50%, rgba(255,79,112,0.55), transparent 60%); }
+.pb-flash.neut { background:radial-gradient(circle at 50% 50%, rgba(124,58,237,0.45), transparent 60%); }
+
 .nav-outer{position:sticky;top:0;z-index:60;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);background:rgba(7,5,26,0.55);border-bottom:1px solid var(--border);}
 .nav{display:flex;align-items:center;gap:28px;height:68px;}
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;letter-spacing:-0.01em;font-size:18px;}
@@ -624,6 +663,13 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
 </div>
 <canvas id="bg-particles" aria-hidden="true"></canvas>
 
+<!-- ══════════ Simulation disclaimer (sticky, dismissible per session) ══════════ -->
+<div id="sim-disclaimer" class="sim-disclaimer" role="status" aria-live="polite">
+  <span class="sd-pill">SIM</span>
+  <span class="sd-text"><b>This is a simulation game</b> · No real money involved · Practice trading on Indian stocks (NSE) with virtual ₹1,00,000 · For learning only.</span>
+  <button type="button" class="sd-close" aria-label="Dismiss disclaimer" onclick="dismissSimDisclaimer()">×</button>
+</div>
+
 <!-- ══════════ Header ══════════ -->
 <div class="nav-outer">
   <div class="wrap">
@@ -677,7 +723,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           <span class="line">Trade the markets.</span>
           <span class="line"><em>Zero risk.</em> All glory.</span>
         </h1>
-        <p>Start with $100,000 in virtual capital, enter 5-minute tournaments, and compete against other players worldwide. Sharpen real trading instincts without risking a cent of your own money.</p>
+        <p>Start with ₹1,00,000 in virtual capital, enter 5-minute tournaments, and compete against other Indian traders. Sharpen real trading instincts on Reliance, TCS, INFY, HDFC Bank — without risking a single rupee.</p>
         <div class="hero-cta">
           <button class="btn btn-primary" id="btn-hero-start" type="button">
             Play Solo Now
@@ -691,7 +737,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
         <div class="hero-stats">
           <div class="hero-stat"><b id="s-players">—</b><small>Players signed up</small></div>
           <div class="hero-stat"><b id="s-tourns">—</b><small>Live tournaments</small></div>
-          <div class="hero-stat"><b>$100K</b><small>Virtual balance</small></div>
+          <div class="hero-stat"><b>₹1,00,000</b><small>Virtual balance</small></div>
         </div>
       </div>
       <div class="hero-preview" aria-hidden="true">
@@ -767,7 +813,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             <b id="round-timer">04:58</b><small>Round</small>
           </div>
           <div class="balance-pill">
-            <span class="lbl">Balance</span><b id="balance">$100,000.00</b>
+            <span class="lbl">Balance</span><b id="balance">₹1,00,000.00</b>
           </div>
           <div class="balance-pill" id="pnl-pill">
             <span class="lbl">P&amp;L</span><b id="pnl">$0.00</b>
@@ -790,9 +836,9 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
         <!-- Instrument list -->
         <aside class="arena-list" aria-label="Instruments">
           <div class="list-tabs" role="tablist">
-            <button class="list-tab active" data-cat="all" role="tab">All</button>
+            <button class="list-tab" data-cat="all" role="tab">All</button>
             <button class="list-tab" data-cat="indices" role="tab">Indices</button>
-            <button class="list-tab" data-cat="in" role="tab">India</button>
+            <button class="list-tab active" data-cat="in" role="tab">India</button>
             <button class="list-tab" data-cat="stocks" role="tab">US</button>
             <button class="list-tab" data-cat="crypto" role="tab">Crypto</button>
             <button class="list-tab" data-cat="fx" role="tab">FX</button>
@@ -907,8 +953,8 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             <!-- Balance tab (account overview) -->
             <div class="term-pane" data-pane="balance">
               <div class="bal-grid">
-                <div class="bal-card"><span class="bal-lbl">Available balance</span><b id="bal-avail">$100,000.00</b></div>
-                <div class="bal-card"><span class="bal-lbl">Equity</span><b id="bal-equity">$100,000.00</b></div>
+                <div class="bal-card"><span class="bal-lbl">Available balance</span><b id="bal-avail">₹1,00,000.00</b></div>
+                <div class="bal-card"><span class="bal-lbl">Equity</span><b id="bal-equity">₹1,00,000.00</b></div>
                 <div class="bal-card"><span class="bal-lbl">Used margin</span><b id="bal-used">$0.00</b></div>
                 <div class="bal-card"><span class="bal-lbl">Unrealised P&amp;L</span><b id="bal-upnl">$0.00</b></div>
                 <div class="bal-card"><span class="bal-lbl">Realised P&amp;L</span><b id="bal-rpnl">$0.00</b></div>
@@ -925,17 +971,17 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             <button class="sell" data-side="sell" role="tab">▼ SELL</button>
           </div>
           <div class="ticket-field">
-            <label>Size (USD)</label>
+            <label>Size (₹)</label>
             <div class="ticket-input">
               <button class="step" type="button" onclick="adjSize(-100)" aria-label="Decrease">−</button>
               <input id="size-input" type="number" value="1000" min="10" step="100">
               <button class="step" type="button" onclick="adjSize(100)" aria-label="Increase">+</button>
             </div>
             <div class="ticket-quick">
-              <button type="button" onclick="setSize(500)">$500</button>
-              <button type="button" onclick="setSize(1000)">$1k</button>
-              <button type="button" onclick="setSize(5000)">$5k</button>
-              <button type="button" onclick="setSize(10000)">$10k</button>
+              <button type="button" onclick="setSize(1000)">₹1,000</button>
+              <button type="button" onclick="setSize(5000)">₹5,000</button>
+              <button type="button" onclick="setSize(25000)">₹25,000</button>
+              <button type="button" onclick="setSize(50000)">₹50,000</button>
             </div>
           </div>
           <div class="ticket-field">
@@ -947,8 +993,8 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           </div>
           <div class="ticket-summary">
             <div class="row"><span class="k">Est. qty</span><span class="v" id="sum-qty">0.0771 BTC</span></div>
-            <div class="row"><span class="k">Est. fee</span><span class="v" id="sum-fee">$0.50</span></div>
-            <div class="row"><span class="k">Liq. price</span><span class="v" id="sum-liq">$52,649.00</span></div>
+            <div class="row"><span class="k">Est. fee</span><span class="v" id="sum-fee">₹0.50</span></div>
+            <div class="row"><span class="k">Liq. price</span><span class="v" id="sum-liq">₹52,649.00</span></div>
           </div>
           <button class="ticket-submit" id="ticket-submit" type="button">Open long · BUY</button>
           <p style="font-size:11px;color:var(--t3);text-align:center;">Paper trading. No real money at risk. <a href="#" style="color:var(--c1);">Learn more →</a></p>
@@ -1006,7 +1052,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       <p class="section-lead">No paperwork. No deposits. No lectures. Just a chart, a timer, and a global scoreboard.</p>
     </div>
     <div class="feat-grid" style="grid-template-columns:repeat(3,1fr);">
-      <div class="feat-card"><div class="feat-icon cyan"><b style="font-size:14px;">01</b></div><h3>Sign up free</h3><p>Email, Google, or Discord. We'll spot you $100,000 in virtual capital and 100 PitBull tokens to start.</p></div>
+      <div class="feat-card"><div class="feat-icon cyan"><b style="font-size:14px;">01</b></div><h3>Sign up free</h3><p>Email, Google, or Discord. We'll spot you ₹1,00,000 in virtual capital and 100 PitBull tokens to start.</p></div>
       <div class="feat-card"><div class="feat-icon purple"><b style="font-size:14px;">02</b></div><h3>Pick your arena</h3><p>Solo practice, a public tournament, or a private game with friends. All use the same fair-replay engine.</p></div>
       <div class="feat-card"><div class="feat-icon buy"><b style="font-size:14px;">03</b></div><h3>Trade the chart</h3><p>Buy, sell, or sit out. Rounds are 5 minutes — small enough to fit in a coffee break, fast enough to feel live.</p></div>
       <div class="feat-card"><div class="feat-icon cyan"><b style="font-size:14px;">04</b></div><h3>Watch the timer</h3><p>Positions auto-close at round end. Biggest net P&L wins. Ties split pots. No nonsense.</p></div>
@@ -1099,14 +1145,14 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
     <div id="htp-slides">
       <div class="htp-slide active" data-slide="0">
         <h2 id="htp-title">Grow Your <em>Virtual Balance</em></h2>
-        <p class="lead">Start with <b>$100,000</b> in virtual capital and make smart <b>BUY</b> and <b>SELL</b> calls. Finish the round with the biggest profit to climb the board.</p>
+        <p class="lead">Start with <b>₹1,00,000</b> in virtual capital and make smart <b>BUY</b> and <b>SELL</b> calls. Finish the round with the biggest profit to climb the board.</p>
         <div class="htp-media"><svg viewBox="0 0 300 140" fill="none"><polyline points="10,100 40,85 60,90 90,60 120,70 160,40 200,55 240,25 290,30" stroke="url(#g1)" stroke-width="3" fill="none"/><defs><linearGradient id="g1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#a855f7"/></linearGradient></defs></svg></div>
       </div>
       <div class="htp-slide" data-slide="1">
         <h2>Every Player <em>Starts With</em></h2>
-        <p class="lead"><b>$100,000</b> virtual trading balance and <b>100 PitBull tokens</b>. Use your balance to trade; use tokens to enter premium tournaments.</p>
+        <p class="lead"><b>₹1,00,000</b> virtual trading balance and <b>100 PitBull tokens</b>. Use your balance to trade; use tokens to enter premium tournaments.</p>
         <div class="htp-media" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px;">
-          <div style="background:var(--glass-2);border-radius:10px;padding:14px;text-align:left;"><small style="color:var(--t3);font-size:10px;letter-spacing:.14em;">VIRTUAL BALANCE</small><b style="display:block;font-family:var(--mono);font-size:22px;color:#fff;">$100K</b></div>
+          <div style="background:var(--glass-2);border-radius:10px;padding:14px;text-align:left;"><small style="color:var(--t3);font-size:10px;letter-spacing:.14em;">VIRTUAL BALANCE</small><b style="display:block;font-family:var(--mono);font-size:22px;color:#fff;">₹1,00,000</b></div>
           <div style="background:var(--glass-2);border-radius:10px;padding:14px;text-align:left;"><small style="color:var(--t3);font-size:10px;letter-spacing:.14em;">PITBULL TOKENS</small><b style="display:block;font-family:var(--mono);font-size:22px;color:var(--y1);">100</b></div>
         </div>
       </div>
@@ -1463,7 +1509,7 @@ const state = {
   balance: 100000,
   pnl: 0,
   positions: [], // {id, sym, side, size, qty, entry, mark}
-  activeSym: 'BTCUSD',
+  activeSym: 'RELIANCE',
   side: 'buy',
   roundSeconds: 5 * 60,
   tfMs: 1000, // chart tick interval (1s default)
@@ -1525,8 +1571,12 @@ const state = {
 // Determine currency symbol for an instrument (used in prices/P&L formatting)
 const cur = sym => (state.instruments.find(i=>i.sym===sym)?.curr) || '$';
 
-const fmt  = n => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
-const fmtUSD = n => (n<0?'-':'') + '$' + fmt(Math.abs(n));
+const fmt   = n => n.toLocaleString('en-US', {minimumFractionDigits:2, maximumFractionDigits:2});
+// Indian-locale rupee formatter: 125000 -> ₹1,25,000.00
+const fmtIN = n => Math.abs(n).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2});
+const fmtINR = n => (n<0?'-':'') + '₹' + fmtIN(n);
+// Account-side amounts always display in ₹. Per-instrument prices keep their own currency (₹ for NSE, $ for US/crypto/FX).
+const fmtUSD = fmtINR; // legacy alias — all internal balances now ₹
 const fmtPct = n => (n>=0?'+':'') + n.toFixed(2) + '%';
 
 function toast(msg, type='success'){
@@ -1537,6 +1587,65 @@ function toast(msg, type='success'){
   t.innerHTML = `<span class="ic">${ic}</span><span>${msg}</span>`;
   wrap.appendChild(t);
   setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(20px)'; setTimeout(()=>t.remove(), 300); }, 3500);
+}
+
+/* ── Simulation disclaimer ───────────────────────────────── */
+function dismissSimDisclaimer(){
+  const el = document.getElementById('sim-disclaimer');
+  if(el) el.classList.add('dismissed');
+  try { sessionStorage.setItem('pb-sim-dismissed', '1'); } catch(_){}
+}
+(function initSimDisclaimer(){
+  try {
+    if(sessionStorage.getItem('pb-sim-dismissed') === '1'){
+      const el = document.getElementById('sim-disclaimer');
+      if(el) el.classList.add('dismissed');
+    }
+  } catch(_){}
+})();
+
+/* ── Trade feedback: short tone + full-page flash ─────────── */
+let _pbAudioCtx = null;
+function pbAudio(){
+  if(_pbAudioCtx) return _pbAudioCtx;
+  try { _pbAudioCtx = new (window.AudioContext || window.webkitAudioContext)(); } catch(_){ _pbAudioCtx = null; }
+  return _pbAudioCtx;
+}
+function pbBeep(kind='buy'){
+  // kind: 'buy' (rising), 'sell' (falling), 'win' (chord), 'loss' (low buzz)
+  const ctx = pbAudio(); if(!ctx) return;
+  if(ctx.state === 'suspended') ctx.resume().catch(()=>{});
+  const now = ctx.currentTime;
+  const make = (freq, t0, dur=0.18, type='sine', gain=0.06) => {
+    const osc = ctx.createOscillator();
+    const g   = ctx.createGain();
+    osc.type = type; osc.frequency.setValueAtTime(freq, now + t0);
+    g.gain.setValueAtTime(0, now + t0);
+    g.gain.linearRampToValueAtTime(gain, now + t0 + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, now + t0 + dur);
+    osc.connect(g); g.connect(ctx.destination);
+    osc.start(now + t0); osc.stop(now + t0 + dur + 0.02);
+  };
+  if(kind === 'buy')      { make(660, 0, 0.10, 'triangle'); make(990, 0.07, 0.16, 'triangle'); }
+  else if(kind === 'sell'){ make(880, 0, 0.10, 'triangle'); make(550, 0.07, 0.16, 'triangle'); }
+  else if(kind === 'win') { make(523.25, 0, 0.10, 'sine'); make(659.25, 0.08, 0.10, 'sine'); make(783.99, 0.16, 0.22, 'sine'); }
+  else if(kind === 'loss'){ make(220, 0, 0.10, 'sawtooth', 0.05); make(165, 0.08, 0.22, 'sawtooth', 0.05); }
+}
+function pbFlash(kind='neut'){
+  // kind: 'up' (green), 'down' (red), 'neut' (purple)
+  const el = document.createElement('div');
+  el.className = 'pb-flash ' + kind;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 700);
+}
+function pbTradeFeedback(kind, pnl){
+  // kind: 'open-buy' | 'open-sell' | 'close'
+  if(kind === 'open-buy')      { pbBeep('buy');  pbFlash('neut'); }
+  else if(kind === 'open-sell'){ pbBeep('sell'); pbFlash('neut'); }
+  else { // close
+    if(pnl >= 0){ pbBeep('win');  pbFlash('up');   }
+    else        { pbBeep('loss'); pbFlash('down'); }
+  }
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -1771,7 +1880,7 @@ function updateTicketSummary(){
   const qty  = (size*lev) / inst.price;
   const qtyLabel = inst.cat==='fx' ? '' : (inst.cat==='crypto' ? ' ' + inst.sym.replace('USD','') : ' sh');
   document.getElementById('sum-qty').textContent = qty.toFixed(inst.cat==='fx'?0:4) + qtyLabel;
-  document.getElementById('sum-fee').textContent = '$' + (size*0.0005).toFixed(2);
+  document.getElementById('sum-fee').textContent = '₹' + (size*0.0005).toFixed(2);
   const liq = state.side==='buy' ? inst.price*(1 - 0.95/lev) : inst.price*(1 + 0.95/lev);
   document.getElementById('sum-liq').textContent = inst.curr + fmt(liq);
 }
@@ -1789,6 +1898,7 @@ document.getElementById('ticket-submit').addEventListener('click', ()=>{
   state.positions.unshift(pos);
   state.balance -= size;
   updatePositions();
+  pbTradeFeedback(state.side === 'buy' ? 'open-buy' : 'open-sell');
   toast((state.side==='buy'?'▲ Opened long ':'▼ Opened short ') + inst.sym + ' · ' + fmtUSD(size), 'success');
 });
 
@@ -1839,7 +1949,7 @@ function renderPositions(){
     return `<tr>
       <td><b>${p.sym}</b></td>
       <td style="color:${p.side==='buy'?'var(--g1)':'var(--r1)'};">${p.side==='buy'?'▲ LONG':'▼ SHORT'}</td>
-      <td>$${fmt(p.size)} · ${p.lev}×</td>
+      <td>₹${fmtIN(p.size)} · ${p.lev}×</td>
       <td>${c}${fmt(p.entry)}</td>
       <td>${c}${fmt(p.mark)}</td>
       <td class="pos-pnl ${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${fmtUSD(pnl)}</td>
@@ -1861,6 +1971,7 @@ function closePosition(id){
   pbInsertTrade(order);
   updatePositions();
   renderOrders();
+  pbTradeFeedback('close', pnl);
   toast(`Closed ${p.sym} · ${pnl>=0?'+':''}${fmtUSD(pnl)}`, pnl>=0?'success':'error');
 }
 function closeAllPositions(){
@@ -1881,6 +1992,7 @@ function closeAllPositions(){
   state.positions = [];
   updatePositions();
   renderOrders();
+  pbTradeFeedback('close', total);
   toast(`Closed ${n} position${n>1?'s':''} · Net ${total>=0?'+':''}${fmtUSD(total)}`, total>=0?'success':'error');
 }
 
@@ -1902,7 +2014,7 @@ function renderOrders(){
       <td style="color:var(--t3);">${o.at}</td>
       <td><b>${o.sym}</b></td>
       <td style="color:${o.side==='buy'?'var(--g1)':'var(--r1)'};">${o.side==='buy'?'LONG':'SHORT'}</td>
-      <td>$${fmt(o.size)}</td>
+      <td>₹${fmtIN(o.size)}</td>
       <td>${c}${fmt(o.entry)}</td>
       <td>${c}${fmt(o.exit)}</td>
       <td class="pos-pnl ${o.pnl>=0?'up':'down'}">${o.pnl>=0?'+':''}${fmtUSD(o.pnl)}</td>
@@ -2030,7 +2142,7 @@ document.getElementById('btn-reset').addEventListener('click', ()=>{
   state.roundSeconds = 5*60;
   updatePositions();
   renderOrders();
-  toast('Round reset. Balance restored to $100,000.', 'success');
+  toast('Round reset. Balance restored to ₹1,00,000.', 'success');
 });
 
 /* ══════════════════════════════════════════════════════════════
@@ -2201,7 +2313,7 @@ function renderTournsFromRows(rows){
   if(!grid) return;
   grid.innerHTML = rows.map((t,idx)=>{
     const type  = t.mode || 'public';
-    const prize = t.prize_pool_usd ? '$' + Number(t.prize_pool_usd).toLocaleString() : 'Bragging rights';
+    const prize = t.prize_pool_usd ? '₹' + Number(t.prize_pool_usd).toLocaleString('en-IN') : 'Bragging rights';
     const entry = t.entry_tokens > 0 ? `${t.entry_tokens} tokens` : 'Free';
     const players = `${t.player_count ?? 0}/${t.max_players ?? 100}`;
     const blurb = type==='private' ? 'A private room among invited friends.'
@@ -2343,7 +2455,7 @@ document.getElementById('year').textContent = new Date().getFullYear();
    ══════════════════════════════════════════════════════════════ */
 initHeroChart();
 initArenaChart();
-renderList('all','');
+renderList('in','');
 startTimer();
 renderOrders();
 renderHoldings();
