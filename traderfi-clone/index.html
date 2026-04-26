@@ -1014,6 +1014,261 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
 
 /* Hide old hero markup if we render the new one (kept as fallback) */
 .hero{ display:none !important; }
+
+/* ══════════ Info modal (about / press / careers / contact / legal / terms / privacy / fairplay / responsible) ══════════ */
+.info-modal{ max-width: 640px; padding: 30px 32px 26px; }
+.info-modal .info-eyebrow{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:6px 12px; border-radius:999px;
+  background:var(--glass); border:1px solid var(--border-2);
+  font-size:10.5px; font-weight:700; letter-spacing:0.16em; text-transform:uppercase;
+  margin-bottom:14px; color:var(--c1);
+}
+.info-modal .info-eyebrow .dot{ width:6px; height:6px; border-radius:50%; background:var(--c1); box-shadow:0 0 8px var(--c-glow); }
+.info-modal h2.info-title{
+  font-size: 26px; line-height:1.15; letter-spacing:-0.015em;
+  margin: 0 0 6px;
+  font-family: var(--f);
+  font-weight: 700;
+}
+.info-modal .info-sub{ color: var(--t3); font-size: 13px; margin-bottom: 18px; }
+.info-modal .info-body{
+  max-height: 60vh; overflow-y: auto; padding-right: 10px;
+  font-size: 14px; line-height: 1.65; color: var(--t2);
+}
+.info-modal .info-body h3{
+  font-size: 14px; font-weight: 600; color: var(--t1);
+  margin: 18px 0 8px; letter-spacing: -0.005em;
+}
+.info-modal .info-body h3:first-child{ margin-top: 0; }
+.info-modal .info-body p{ margin-bottom: 10px; }
+.info-modal .info-body ul{ margin: 6px 0 12px 18px; padding: 0; }
+.info-modal .info-body li{ margin: 4px 0; color: var(--t2); }
+.info-modal .info-body strong, .info-modal .info-body b{ color: var(--t1); font-weight: 600; }
+.info-modal .info-body em{ font-style: normal; background: linear-gradient(120deg,var(--c1),var(--p1)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.info-modal .info-body a{ color: var(--c1); text-decoration: none; border-bottom: 1px solid rgba(34,211,238,0.4); }
+.info-modal .info-body a:hover{ color: #7ee9ff; border-bottom-color: var(--c1); }
+.info-modal .info-body code, .info-modal .info-body .mono{
+  font-family: var(--mono); font-size: 12.5px;
+  background: var(--glass); padding: 2px 6px; border-radius: 5px; color: var(--t1);
+}
+.info-modal .info-body hr{ border:0; border-top:1px solid var(--border); margin: 18px 0; }
+.info-modal .info-body .small{ font-size:12px; color: var(--t3); margin-top: 18px; }
+
+/* Pretty scrollbar inside info body */
+.info-modal .info-body::-webkit-scrollbar{ width: 8px; }
+.info-modal .info-body::-webkit-scrollbar-track{ background: transparent; }
+.info-modal .info-body::-webkit-scrollbar-thumb{ background: var(--glass-2); border-radius: 4px; }
+.info-modal .info-body::-webkit-scrollbar-thumb:hover{ background: var(--p-soft); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Mobile-first overhaul: bottom nav, FAB, safe areas, taps, transitions
+   Activated below 720px. Desktop layout untouched.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* iOS / Android viewport-height bug — JS sets --vh = 1% of innerHeight */
+:root{ --vh: 1vh; }
+
+/* Safe-area insets for notched devices */
+body{
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+
+/* Prevent iOS auto-zoom on input focus (must be ≥16px) */
+@media (max-width: 720px){
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="search"],
+  input[type="number"],
+  input[type="tel"],
+  textarea,
+  select{
+    font-size: 16px !important;
+  }
+}
+
+/* ─── Bottom nav (mobile) ─────────────────────────────────────────── */
+.mob-nav{
+  display: none;
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  z-index: 95;
+  padding: 8px 12px calc(8px + env(safe-area-inset-bottom, 0));
+  background: rgba(7, 5, 26, 0.82);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -10px 30px -8px rgba(0,0,0,0.5);
+}
+.mob-nav-grid{
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px;
+  max-width: 460px;
+  margin: 0 auto;
+}
+.mob-nav-btn{
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  padding: 8px 4px;
+  min-height: 52px;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--t3);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color .2s ease, background .2s ease, transform .15s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-nav-btn svg{
+  width: 22px; height: 22px;
+  stroke: currentColor; fill: none;
+  stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round;
+}
+.mob-nav-btn.active{
+  color: var(--c1);
+  background: linear-gradient(180deg, rgba(34,211,238,0.10), rgba(168,85,247,0.06));
+}
+.mob-nav-btn.active svg{ filter: drop-shadow(0 0 6px var(--c-glow)); }
+.mob-nav-btn:active{ transform: scale(0.94); }
+
+/* ─── FAB (mobile) ───────────────────────────────────────────────── */
+.mob-fab{
+  display: none;
+  position: fixed;
+  right: 16px;
+  bottom: calc(80px + env(safe-area-inset-bottom, 0));
+  z-index: 96;
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--c1), var(--p1));
+  color: #fff;
+  align-items: center; justify-content: center;
+  box-shadow: 0 12px 32px -6px rgba(168,85,247,0.55), 0 4px 12px -2px rgba(34,211,238,0.4);
+  font-size: 22px;
+  border: 0;
+  cursor: pointer;
+  transition: transform .2s cubic-bezier(.2,.8,.2,1), box-shadow .2s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-fab svg{ width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;}
+.mob-fab:active{ transform: scale(0.92); }
+.mob-fab.is-pulse::after{
+  content: ''; position: absolute; inset: -4px; border-radius: 50%;
+  border: 2px solid var(--c1); animation: fabPulse 1.6s ease-out infinite;
+}
+@keyframes fabPulse{
+  0%{ opacity: 0.6; transform: scale(1); }
+  100%{ opacity: 0; transform: scale(1.5); }
+}
+
+/* ─── Pull-to-refresh indicator ──────────────────────────────────── */
+.mob-ptr{
+  position: fixed; left: 50%; top: 60px;
+  transform: translate(-50%, -60px);
+  z-index: 90;
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px; border-radius: 999px;
+  background: rgba(20, 12, 50, 0.92);
+  border: 1px solid var(--border-2);
+  font-size: 12px; font-weight: 600;
+  color: var(--c1);
+  pointer-events: none;
+  transition: transform .25s cubic-bezier(.2,.8,.2,1), opacity .2s;
+  opacity: 0;
+}
+.mob-ptr.show{ opacity: 1; transform: translate(-50%, 0); }
+.mob-ptr.spin svg{ animation: spin 0.8s linear infinite; }
+@keyframes spin{ to{ transform: rotate(360deg); } }
+.mob-ptr svg{ width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2.4; }
+
+/* ─── Section transition (fade up on enter) ─────────────────────── */
+@media (max-width: 720px){
+  .section{
+    opacity: 0;
+    transform: translateY(12px);
+    transition: opacity .55s cubic-bezier(.2,.8,.2,1), transform .55s cubic-bezier(.2,.8,.2,1);
+  }
+  .section.in-view, .section.always-show{
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Show mobile-only chrome below 720px ────────────────────────── */
+@media (max-width: 720px){
+  .mob-nav{ display: block; }
+  .mob-fab{ display: flex; }
+  body{ padding-bottom: calc(76px + env(safe-area-inset-bottom, 0)); }
+  /* Push footer above bottom nav */
+  footer{ margin-bottom: 0; }
+  /* Bigger tap targets */
+  .btn, .btn-ghost, .btn-primary, button.cta, .nav-links a, .feat-card a, .auth-tabs button{
+    min-height: 44px;
+  }
+  /* Hide redundant header start button on mobile (the FAB replaces it) */
+  #btn-start{ display: none; }
+  /* Hide nav-live counter on mobile to keep header compact */
+  .nav-live{ display: none !important; }
+  /* Compact header */
+  .nav{ gap: 8px; padding: 10px 0; }
+  .logo-text small{ display: none; }
+}
+
+/* ─── Sticky buy/sell bar inside arena (mobile) ──────────────────── */
+.mob-sticky-trade{
+  display: none;
+}
+@media (max-width: 720px){
+  .mob-sticky-trade{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    position: sticky;
+    bottom: calc(76px + env(safe-area-inset-bottom, 0));
+    z-index: 8;
+    margin: 12px -16px -16px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom, 0));
+    background: linear-gradient(180deg, rgba(7, 5, 26, 0.0), rgba(7, 5, 26, 0.96) 30%);
+    backdrop-filter: blur(8px);
+  }
+  .mob-sticky-trade button{
+    height: 48px;
+    border-radius: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    font-size: 14px;
+    color: #fff;
+    border: 0;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .mob-sticky-trade .buy{ background: linear-gradient(135deg, #00b386, #16d29a); }
+  .mob-sticky-trade .sell{ background: linear-gradient(135deg, #ff3b6b, #ff7a8a); }
+  .mob-sticky-trade button:active{ transform: scale(0.97); }
+}
+
+/* ─── Swipeable terminal tabs visual hint ────────────────────────── */
+@media (max-width: 720px){
+  .term-tabs{
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .term-tabs::-webkit-scrollbar{ display: none; }
+  .term-tabs button{
+    scroll-snap-align: start;
+    flex: 0 0 auto;
+    min-height: 40px;
+    padding-left: 14px; padding-right: 14px;
+  }
+}
+
+/* ─── Hide nav links + start button on small viewports ──────────── */
+@media (max-width: 900px){
+  .nav-links{ display: none; }
+}
 </style>
 </head>
 <body>
@@ -1480,6 +1735,12 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           <p style="font-size:11px;color:var(--t3);text-align:center;">Paper trading. No real money at risk. <a href="#" style="color:var(--c1);">Learn more →</a></p>
         </aside>
       </div>
+
+      <!-- Sticky buy/sell bar (mobile only — sits above bottom nav) -->
+      <div class="mob-sticky-trade" aria-hidden="false">
+        <button class="buy" id="mob-quick-buy" type="button">BUY</button>
+        <button class="sell" id="mob-quick-sell" type="button">SELL</button>
+      </div>
     </div>
   </div>
 </section>
@@ -1656,15 +1917,15 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       </div>
       <div class="foot-col">
         <h5>Company</h5>
-        <a href="#">About</a><a href="#">Press kit</a><a href="#">Careers</a><a href="#">Contact</a>
+        <a href="#" data-info="about">About</a><a href="#" data-info="press">Press kit</a><a href="#" data-info="careers">Careers</a><a href="#" data-info="contact">Contact</a>
       </div>
       <div class="foot-col">
         <h5>Legal</h5>
-        <a href="#">Terms</a><a href="#">Privacy</a><a href="#">Fair play</a><a href="#">Responsible gaming</a>
+        <a href="#" data-info="terms">Terms</a><a href="#" data-info="privacy">Privacy</a><a href="#" data-info="fairplay">Fair play</a><a href="#" data-info="responsible">Responsible gaming</a>
       </div>
     </div>
     <div class="foot-bot">
-      <div>© <span id="year"></span> PitBull Markets · Demo-only paper trading. Not investment advice.</div>
+      <div>© <span id="year"></span> PitBull Markets · Demo-only paper trading. Not investment advice. <a href="#" data-info="legal" style="color:var(--t3);text-decoration:underline;">Disclaimer</a>.</div>
       <div style="display:flex;gap:10px;">
         <span class="kb">B</span> Buy · <span class="kb">S</span> Sell · <span class="kb">R</span> Reset · <span class="kb">?</span> How to play
       </div>
@@ -1773,9 +2034,10 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
     <h2 id="auth-title" style="text-align:center;"><em>Sign in</em> to PitBull</h2>
     <p class="lead" style="text-align:center;">Save your rank, join tournaments, and invite friends.</p>
     <div class="auth-oauth">
-      <button type="button"><svg class="ic" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 7.9-21l5.7-5.7C33.6 6 29 4 24 4A20 20 0 1 0 44 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.9 2.9l5.7-5.7C33.6 6 29 4 24 4A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5 0 9.5-1.9 12.9-5l-6-4.9a12 12 0 0 1-6.9 2.1c-5.3 0-9.7-3.4-11.3-8l-6.6 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.4l6 4.9A20 20 0 0 0 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>Google</button>
-      <button type="button"><svg class="ic" viewBox="0 0 24 24" fill="#5865F2"><path d="M20.3 4.4A19 19 0 0 0 15.4 3l-.2.5c1.7.4 2.5 1 3.4 1.8a11 11 0 0 0-12.4 0c1-.8 2-1.4 3.6-1.8L9.5 3a19 19 0 0 0-5 1.4A21 21 0 0 0 1 16s2 3 5 3c0 0 .6-.6 1-1.2-1.6-.5-2.3-1.5-2.3-1.5l.6.4.1.1.1.1a9.3 9.3 0 0 0 3.2 1.3 9 9 0 0 0 5.3 0 8.6 8.6 0 0 0 3-1l.6-.5s-.7 1-2.4 1.6c.4.6 1 1.2 1 1.2 3 0 5-3 5-3 0-3.3-.9-7.6-3-11.6zM9 14.1c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7c0 1-.6 1.7-1.4 1.7zm6 0c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7-.6 1.7-1.4 1.7z"/></svg>Discord</button>
+      <button type="button" id="btn-oauth-google" onclick="pbStartOAuth('google')"><svg class="ic" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 7.9-21l5.7-5.7C33.6 6 29 4 24 4A20 20 0 1 0 44 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.9 2.9l5.7-5.7C33.6 6 29 4 24 4A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5 0 9.5-1.9 12.9-5l-6-4.9a12 12 0 0 1-6.9 2.1c-5.3 0-9.7-3.4-11.3-8l-6.6 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.4l6 4.9A20 20 0 0 0 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>Google</button>
+      <button type="button" id="btn-oauth-discord" onclick="pbStartOAuth('discord')"><svg class="ic" viewBox="0 0 24 24" fill="#5865F2"><path d="M20.3 4.4A19 19 0 0 0 15.4 3l-.2.5c1.7.4 2.5 1 3.4 1.8a11 11 0 0 0-12.4 0c1-.8 2-1.4 3.6-1.8L9.5 3a19 19 0 0 0-5 1.4A21 21 0 0 0 1 16s2 3 5 3c0 0 .6-.6 1-1.2-1.6-.5-2.3-1.5-2.3-1.5l.6.4.1.1.1.1a9.3 9.3 0 0 0 3.2 1.3 9 9 0 0 0 5.3 0 8.6 8.6 0 0 0 3-1l.6-.5s-.7 1-2.4 1.6c.4.6 1 1.2 1 1.2 3 0 5-3 5-3 0-3.3-.9-7.6-3-11.6zM9 14.1c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7c0 1-.6 1.7-1.4 1.7zm6 0c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7-.6 1.7-1.4 1.7z"/></svg>Discord</button>
     </div>
+    <div id="oauth-note" style="display:none;font-size:11.5px;color:var(--t3);text-align:center;margin:-10px 0 14px;line-height:1.5;"></div>
     <div class="auth-divider">or with email</div>
     <div class="auth-tabs" role="tablist">
       <button class="active" data-authtab="login" role="tab">Log in</button>
@@ -1795,8 +2057,54 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
   </div>
 </div>
 
+<!-- Info modal (about / press / careers / contact / terms / privacy / fairplay / responsible) -->
+<div class="modal-overlay" id="info-modal" role="dialog" aria-modal="true" aria-labelledby="info-title">
+  <div class="modal info-modal">
+    <button class="modal-close" data-close="info-modal" aria-label="Close">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+    <div class="info-eyebrow"><span class="dot"></span><span id="info-eyebrow-text">About</span></div>
+    <h2 id="info-title" class="info-title">Building, learning, shipping.</h2>
+    <div class="info-sub" id="info-sub"></div>
+    <div class="info-body" id="info-body"></div>
+  </div>
+</div>
+
 <!-- Toasts -->
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
+
+<!-- ══════════ Mobile bottom nav ══════════ -->
+<nav class="mob-nav" id="mob-nav" aria-label="Mobile navigation">
+  <div class="mob-nav-grid">
+    <button class="mob-nav-btn active" data-mob-target="arena" type="button">
+      <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+      <span>Trade</span>
+    </button>
+    <button class="mob-nav-btn" data-mob-target="tournaments" type="button">
+      <svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 4h3v3a3 3 0 0 1-3 3"/><path d="M7 4H4v3a3 3 0 0 0 3 3"/></svg>
+      <span>Markets</span>
+    </button>
+    <button class="mob-nav-btn" data-mob-target="portfolio" type="button">
+      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M12 3v9l5 3"/></svg>
+      <span>Portfolio</span>
+    </button>
+    <button class="mob-nav-btn" data-mob-target="leaderboard" type="button">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
+      <span>Profile</span>
+    </button>
+  </div>
+</nav>
+
+<!-- ══════════ Mobile FAB Buy/Sell ══════════ -->
+<button class="mob-fab" id="mob-fab" type="button" aria-label="Quick Buy / Sell">
+  <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
+</button>
+
+<!-- Pull-to-refresh indicator -->
+<div class="mob-ptr" id="mob-ptr" aria-hidden="true">
+  <svg viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+  <span id="mob-ptr-text">Pull to refresh</span>
+</div>
 
 <script>
 /* ══════════════════════════════════════════════════════════════
@@ -2338,7 +2646,13 @@ function pbRenderAuthChip(){
   if(!btn) return;
   if(pb.user){
     const name = pb.profile?.handle || pb.profile?.display_name || pb.user.email?.split('@')[0] || 'player';
-    btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;"><span style="width:22px;height:22px;border-radius:50%;background:${pb.profile?.avatar_color||'#7c3aed'};display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;">${name.slice(0,2).toUpperCase()}</span>${name}</span>`;
+    const avatarUrl = pb.profile?.avatar_url || pb.user?.avatar_url;
+    const avatarBg = pb.profile?.avatar_color || '#7c3aed';
+    const initials = name.slice(0,2).toUpperCase();
+    const avatarHTML = avatarUrl
+      ? `<span style="width:22px;height:22px;border-radius:50%;background:url('${avatarUrl}') center/cover, ${avatarBg};display:inline-block;border:1px solid rgba(255,255,255,0.18);"></span>`
+      : `<span style="width:22px;height:22px;border-radius:50%;background:${avatarBg};display:inline-grid;place-items:center;font-size:10px;font-weight:700;color:#fff;">${initials}</span>`;
+    btn.innerHTML = `<span style="display:inline-flex;align-items:center;gap:8px;">${avatarHTML}${name}</span>`;
     btn.onclick = async () => {
       if(confirm('Sign out of PitBull Markets?')){
         await pbSignOut();
@@ -2360,13 +2674,92 @@ async function pbInit(){
     console.info('[PitBull] Demo mode — API not configured.');
     return;
   }
+  // OAuth handoff: backend redirects back with #oauth_token=JWT in the URL
+  const hashTok = pbReadOAuthHash();
+  if(hashTok){
+    pb.token = hashTok;
+    localStorage.setItem(PB_TOKEN_KEY, pb.token);
+    pbCleanOAuthHash();
+  }
   if(pb.token){
     await pbLoadProfile();
   }
   pbRenderAuthChip();
   pbRefreshStats();
+  pbRefreshOAuthStatus();
   setInterval(pbRefreshStats, 30000);  // poll every 30s
+  if(hashTok && pb.user){
+    if(typeof toast === 'function') toast(`Signed in as @${pb.user.handle}`, 'good');
+  }
 }
+
+/* ─── OAuth (Google + Discord) ─────────────────────────────────── */
+function pbReadOAuthHash(){
+  // We send the JWT in the URL fragment so it never hits server logs.
+  const m = (location.hash || '').match(/(?:^#|&)oauth_token=([^&]+)/);
+  return m ? decodeURIComponent(m[1]) : null;
+}
+function pbCleanOAuthHash(){
+  // Remove just the oauth_token piece, preserve any other hash content.
+  let h = (location.hash || '').replace(/^#/, '');
+  h = h.split('&').filter(p => !p.startsWith('oauth_token=')).join('&');
+  const newUrl = location.pathname + location.search + (h ? '#' + h : '');
+  history.replaceState(null, '', newUrl);
+}
+function pbStartOAuth(provider){
+  if(!PB_LIVE){
+    if(typeof toast === 'function') toast('API not configured.', 'bad');
+    return;
+  }
+  // Full-page redirect — backend handles the dance and redirects us back with the token.
+  window.location.href = `${PB_API}/auth/${provider}`;
+}
+async function pbRefreshOAuthStatus(){
+  if(!PB_LIVE) return;
+  let s;
+  try {
+    s = await pbApi('/api/auth/oauth-status');
+  } catch (e){
+    // Endpoint missing (older backend) or cold-start — assume neither provider configured.
+    s = { google: false, discord: false };
+  }
+  {
+    pb.oauth = s;
+    const note = document.getElementById('oauth-note');
+    const gBtn = document.getElementById('btn-oauth-google');
+    const dBtn = document.getElementById('btn-oauth-discord');
+    const missing = [];
+    if(gBtn){
+      if(!s.google){
+        gBtn.disabled = true; gBtn.style.opacity = 0.55; gBtn.style.cursor = 'not-allowed';
+        gBtn.title = 'Google OAuth not configured yet';
+        missing.push('Google');
+      } else {
+        gBtn.disabled = false; gBtn.style.opacity = ''; gBtn.style.cursor = '';
+        gBtn.title = '';
+      }
+    }
+    if(dBtn){
+      if(!s.discord){
+        dBtn.disabled = true; dBtn.style.opacity = 0.55; dBtn.style.cursor = 'not-allowed';
+        dBtn.title = 'Discord OAuth not configured yet';
+        missing.push('Discord');
+      } else {
+        dBtn.disabled = false; dBtn.style.opacity = ''; dBtn.style.cursor = '';
+        dBtn.title = '';
+      }
+    }
+    if(note){
+      if(missing.length){
+        note.textContent = `${missing.join(' & ')} sign-in not configured yet — use email below.`;
+        note.style.display = 'block';
+      } else {
+        note.style.display = 'none';
+      }
+    }
+  }
+}
+window.pbStartOAuth = pbStartOAuth;
 
 /* ══════════════════════════════════════════════════════════════
    State
@@ -2789,6 +3182,7 @@ function setSide(side){
   updateTicketSubmitLabel();
   updateTicketSummary();
 }
+window.setSide = setSide;
 document.querySelectorAll('.ticket-toggle button').forEach(b=>{
   b.addEventListener('click', ()=>setSide(b.dataset.side));
 });
@@ -3202,6 +3596,191 @@ function closeModal(id){
   if(id==='welcome-modal') localStorage.setItem('pb-welcome-seen', '1');
 }
 window.openModal = openModal; window.closeModal = closeModal;
+
+/* ══════════════════════════════════════════════════════════════
+   Info modal — About / Press / Careers / Contact / Terms / Privacy / Fair Play / Responsible Gaming
+   ══════════════════════════════════════════════════════════════ */
+const PB_INFO = {
+  about: {
+    eyebrow: 'About',
+    title: 'Built by a Class 12 student. Shipped like it isn\'t.',
+    sub: 'PitBull Markets is a free, gamified trading simulator made in India.',
+    body: `
+      <h3>What this is</h3>
+      <p>PitBull Markets is a stock-market simulator built for one thing: <b>letting you learn how markets feel without risking a rupee.</b> Indian stocks (NSE), real-time-style price action, candlestick charts across seven timeframes, virtual ₹1,00,000 balance, tournaments, leaderboards, and a global ranking — all in your browser, no install required.</p>
+      <h3>Who built this</h3>
+      <p>A Class 12 student from India who got obsessed with figuring out how things work and rebuilding them better. The codebase, the design, the API, the simulation engine — all of it was built solo, in late nights, on a laptop, while juggling exams.</p>
+      <h3>What's next</h3>
+      <p>More instruments. Friend-only tournaments. A proper option-chain tab. Real anchored data refreshed daily. Better charts. Better polish. The roadmap is public — every commit ships in days, not quarters.</p>
+      <p class="small">If you spot something broken or have ideas, email <a href="mailto:cosmiccrumbs.07@gmail.com">cosmiccrumbs.07@gmail.com</a>.</p>
+    `,
+  },
+
+  press: {
+    eyebrow: 'Press kit',
+    title: 'For media, collaborators, and conversations.',
+    sub: 'Bios, brand info, and contact for press inquiries.',
+    body: `
+      <h3>Boilerplate</h3>
+      <p><b>PitBull Markets</b> is a free, gamified Indian stock-market simulator built by a Class 12 student. It teaches market mechanics through 5-minute tournaments, candlestick charts, and a global leaderboard — with zero real-money risk.</p>
+      <h3>Short bio (50 words)</h3>
+      <p>Subhransu Nayak is a Class 12 student from India building projects in technology, finance, and design. From trading simulators to portfolio tools, he focuses on clean engineering, honest interfaces, and shipping fast — proving that meaningful products don't need a degree, just curiosity.</p>
+      <h3>Long bio (90 words)</h3>
+      <p>Subhransu Nayak is a Class 12 student and independent builder based in India. His work spans full-stack web development, fintech experimentation, and product design — with a clear focus on craft, clarity, and real-world usefulness. He's currently building <em>PitBull Markets</em>, a gamified Indian stock-market simulator, alongside a growing portfolio of side projects. When he isn't shipping code, he's reading market history, studying interfaces from Stripe to Apple, and writing about what he learns. He believes the best way to grow is to build in public.</p>
+      <h3>Contact</h3>
+      <ul>
+        <li>Press inquiries: <a href="mailto:sbhrnsnk@gmail.com">sbhrnsnk@gmail.com</a></li>
+        <li>Collaborations: <a href="mailto:cosmiccrumbs.07@gmail.com">cosmiccrumbs.07@gmail.com</a></li>
+      </ul>
+      <p class="small">Brand colors: violet <code>#a855f7</code>, cyan <code>#22d3ee</code>, deep navy <code>#07051a</code>. Wordmark: PitBull Markets · Trade · Compete · Win.</p>
+    `,
+  },
+
+  careers: {
+    eyebrow: 'Careers',
+    title: 'Open to collaborations.',
+    sub: 'Personal project — no formal hiring page, but plenty of doors are open.',
+    body: `
+      <p>This is a personal project, not a company — so there's no "We're hiring" page.</p>
+      <p>But if you're working on something interesting in <b>tech, finance, design, or product</b>, I'd love to talk. Internships, paid freelance work, open-source collabs, hackathons, or just trading ideas — all welcome.</p>
+      <h3>How to reach out</h3>
+      <ul>
+        <li>Send a short email to <a href="mailto:sbhrnsnk@gmail.com">sbhrnsnk@gmail.com</a></li>
+        <li>Tell me what you're building and why I should care</li>
+        <li>Skip the corporate intro paragraph — be direct, be specific</li>
+      </ul>
+      <p class="small">Short emails get faster replies. Most messages answered within 48 hours.</p>
+    `,
+  },
+
+  contact: {
+    eyebrow: 'Contact',
+    title: 'Let\'s talk.',
+    sub: 'The fastest way to reach me is email.',
+    body: `
+      <h3>Email</h3>
+      <ul>
+        <li><b>General:</b> <a href="mailto:sbhrnsnk@gmail.com">sbhrnsnk@gmail.com</a></li>
+        <li><b>Collaborations &amp; projects:</b> <a href="mailto:cosmiccrumbs.07@gmail.com">cosmiccrumbs.07@gmail.com</a></li>
+      </ul>
+      <h3>Response time</h3>
+      <p>I read everything. I reply to most things within 48 hours.</p>
+      <h3>What helps</h3>
+      <p>If you're sending a project idea, a job, or feedback — keep it short, be specific, and tell me why you're reaching out. That's it.</p>
+    `,
+  },
+
+  legal: {
+    eyebrow: 'Legal',
+    title: 'Disclaimer.',
+    sub: 'Plain-English notice about ownership, liability, and trademarks.',
+    body: `
+      <p>This website is a personal portfolio and educational simulator created and maintained by Subhransu Nayak. All content, code, and projects shown here are owned by their respective authors and are shared for educational, demonstrative, and non-commercial purposes unless explicitly stated otherwise.</p>
+      <p>Information on this site is provided <b>as-is</b>, without warranty of any kind. The owner is not liable for any loss or damage arising from the use of this website or any linked resources.</p>
+      <p>Logos, brand names, and trademarks belong to their respective owners and appear here only for identification or reference.</p>
+      <p class="small">PitBull Markets is a simulator. No real money is processed, held, or transferred at any point.</p>
+    `,
+  },
+
+  terms: {
+    eyebrow: 'Terms of Use',
+    title: 'What you can and can\'t do here.',
+    sub: 'By using PitBull Markets, you agree to the following.',
+    body: `
+      <h3>Your responsibilities</h3>
+      <ul>
+        <li>You'll use the site for lawful, personal, and non-commercial purposes only.</li>
+        <li>You won't copy, redistribute, or resell content or code from this site without written permission.</li>
+        <li>You won't attempt to break, exploit, or misuse any part of the site or its underlying services.</li>
+        <li>Anything you submit (feedback, messages, etc.) is assumed to be voluntary and non-confidential unless agreed otherwise in writing.</li>
+      </ul>
+      <h3>Account security</h3>
+      <p>You're responsible for keeping your login credentials safe. If you suspect unauthorized access, email <a href="mailto:cosmiccrumbs.07@gmail.com">cosmiccrumbs.07@gmail.com</a> and we'll invalidate your session.</p>
+      <h3>Updates</h3>
+      <p>These terms may be updated at any time. Continuing to use the site means you accept the latest version.</p>
+    `,
+  },
+
+  privacy: {
+    eyebrow: 'Privacy',
+    title: 'Short version: I respect your data.',
+    sub: 'No selling. No third-party tracking pixels. Minimal collection.',
+    body: `
+      <h3>What might be collected</h3>
+      <ul>
+        <li>Basic, anonymous analytics (page visits, device type, country) to understand what's useful.</li>
+        <li>Information you voluntarily share by signing up or emailing me — username, email, hashed password, your simulated trade history.</li>
+      </ul>
+      <h3>What is never collected</h3>
+      <ul>
+        <li>Names, phone numbers, or personal details without your explicit input.</li>
+        <li>Payment information. The site does not process payments.</li>
+        <li>Anything that gets sold, traded, or handed to third parties.</li>
+      </ul>
+      <h3>Where data lives</h3>
+      <p>Account data lives in a SQLite database on a Fly.io server in India/US regions, mounted on a persistent volume. Passwords are stored only as <b>bcrypt hashes</b> — never plaintext. JWT session tokens live in your browser's localStorage and expire after 30 days.</p>
+      <h3>Your rights</h3>
+      <p>Email <a href="mailto:sbhrnsnk@gmail.com">sbhrnsnk@gmail.com</a> at any time to ask what's stored about you, export it, or have it deleted.</p>
+    `,
+  },
+
+  fairplay: {
+    eyebrow: 'Fair Play',
+    title: 'Honesty is the product.',
+    sub: 'Built with one rule: don\'t pretend.',
+    body: `
+      <h3>What this means</h3>
+      <ul>
+        <li>Numbers shown in projects (P&amp;L, balances, leaderboards) reflect either real data or clearly-marked simulated data — never fake values designed to inflate engagement.</li>
+        <li>Where a project simulates a real-world system (markets, trading, finance), it is labeled clearly as a simulation.</li>
+        <li>No misleading claims. No staged screenshots. No hidden affiliate manipulations.</li>
+      </ul>
+      <h3>Tournament integrity</h3>
+      <p>Every player in a tournament gets the same starting balance, the same chart replay, and the same execution model. There are no premium "boost" packages, no pay-to-win mechanics, and no hidden advantages.</p>
+      <h3>Found something off?</h3>
+      <p>Email <a href="mailto:cosmiccrumbs.07@gmail.com">cosmiccrumbs.07@gmail.com</a> — I'd rather fix it than hide it.</p>
+    `,
+  },
+
+  responsible: {
+    eyebrow: 'Responsible Gaming',
+    title: 'For learning. Not for losing.',
+    sub: 'Important reminders before you trade — even with virtual money.',
+    body: `
+      <p>PitBull Markets simulates financial markets for <b>educational and entertainment purposes only.</b></p>
+      <h3>Please remember</h3>
+      <ul>
+        <li><b>No real money is involved.</b> Virtual balances, profits, and losses are part of a game.</li>
+        <li><b>Past simulated performance is not a predictor of real-world results.</b> Real markets carry real risk.</li>
+        <li><b>These tools are for learning, not investing.</b> Do not treat them as financial advice.</li>
+        <li>If you trade real money elsewhere, do so only with capital you can afford to lose, and consult a SEBI-registered financial professional.</li>
+      </ul>
+      <h3>Take a break if it stops being fun</h3>
+      <p>If trading or markets are starting to feel stressful or compulsive, step away. India's <b>iCall helpline</b> (<a href="tel:9152987821">9152987821</a>) offers free, confidential mental-health support.</p>
+      <p class="small">PitBull Markets has no real-money mode. There is no path inside this app that puts your money at risk.</p>
+    `,
+  },
+};
+
+function openInfoModal(key){
+  const data = PB_INFO[key] || PB_INFO.about;
+  document.getElementById('info-eyebrow-text').textContent = data.eyebrow;
+  document.getElementById('info-title').textContent = data.title;
+  document.getElementById('info-sub').textContent = data.sub;
+  document.getElementById('info-body').innerHTML = data.body;
+  // scroll body to top each open
+  const body = document.getElementById('info-body');
+  body.scrollTop = 0;
+  openModal('info-modal');
+}
+window.openInfoModal = openInfoModal;
+
+document.querySelectorAll('a[data-info]').forEach(a => {
+  a.addEventListener('click', (e) => {
+    e.preventDefault();
+    openInfoModal(a.dataset.info);
+  });
+});
 
 document.querySelectorAll('[data-close]').forEach(b=>{
   b.addEventListener('click', ()=>closeModal(b.dataset.close));
@@ -4041,6 +4620,214 @@ setInterval(renderNews, 15000);
 // Pull anchor prices once at boot, then daily
 pbFetchAnchors();
 setInterval(pbFetchAnchors, 6 * 60 * 60 * 1000);
+
+/* ══════════════════════════════════════════════════════════════
+   Mobile UX overhaul (bottom nav, FAB, PTR, swipe, haptic, 100vh)
+   ══════════════════════════════════════════════════════════════ */
+(function initMobileUX(){
+  const isMobile = () => window.innerWidth < 720 || ('ontouchstart' in window);
+
+  /* 100vh bug fix: --vh = real viewport height / 100 */
+  function setVh(){
+    document.documentElement.style.setProperty('--vh', `${window.innerHeight * 0.01}px`);
+  }
+  setVh();
+  window.addEventListener('resize', setVh);
+  window.addEventListener('orientationchange', () => setTimeout(setVh, 60));
+
+  /* Haptic feedback helper */
+  function haptic(ms){
+    try { if(navigator.vibrate) navigator.vibrate(ms || 12); } catch {}
+  }
+  window.pbHaptic = haptic;
+
+  /* Bottom nav: tap → scroll to section, IO → highlight active */
+  const navBtns = document.querySelectorAll('.mob-nav-btn');
+  navBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tgt = btn.dataset.mobTarget;
+      const el = document.getElementById(tgt);
+      if(el){
+        haptic(8);
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      navBtns.forEach(b => b.classList.toggle('active', b === btn));
+    });
+  });
+
+  if('IntersectionObserver' in window){
+    const targets = ['arena','tournaments','portfolio','leaderboard']
+      .map(id => document.getElementById(id))
+      .filter(Boolean);
+    const navByTarget = {};
+    navBtns.forEach(b => { navByTarget[b.dataset.mobTarget] = b; });
+    const io = new IntersectionObserver((entries) => {
+      // pick the most-visible section
+      let best = null, bestRatio = 0;
+      entries.forEach(e => {
+        if(e.isIntersecting && e.intersectionRatio > bestRatio){
+          bestRatio = e.intersectionRatio; best = e.target;
+        }
+      });
+      if(best && best.id && navByTarget[best.id]){
+        navBtns.forEach(b => b.classList.toggle('active', b === navByTarget[best.id]));
+      }
+    }, { rootMargin: '-30% 0px -50% 0px', threshold: [0.05, 0.25, 0.5, 0.75] });
+    targets.forEach(t => io.observe(t));
+  }
+
+  /* FAB: scroll to arena and open the trade ticket */
+  const fab = document.getElementById('mob-fab');
+  if(fab){
+    fab.addEventListener('click', () => {
+      haptic(10);
+      const arena = document.getElementById('arena');
+      if(arena) arena.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // briefly highlight ticket
+      setTimeout(() => {
+        const t = document.getElementById('ticket-submit');
+        if(t) t.focus({ preventScroll: true });
+      }, 600);
+    });
+    // Pulse the FAB on first scroll into arena (then stop)
+    let pulsed = false;
+    window.addEventListener('scroll', () => {
+      if(pulsed) return;
+      const arena = document.getElementById('arena');
+      if(!arena) return;
+      const r = arena.getBoundingClientRect();
+      if(r.top < window.innerHeight && r.bottom > 0){
+        fab.classList.add('is-pulse');
+        setTimeout(() => fab.classList.remove('is-pulse'), 4000);
+        pulsed = true;
+      }
+    }, { passive: true });
+  }
+
+  /* Sticky mobile Buy/Sell — drives the existing ticket */
+  const setSide = window.setSide;
+  const submitBtn = document.getElementById('ticket-submit');
+  const wireMobBtn = (id, side) => {
+    const b = document.getElementById(id);
+    if(!b || !submitBtn) return;
+    b.addEventListener('click', () => {
+      haptic(15);
+      if(typeof window.setSide === 'function') window.setSide(side);
+      submitBtn.click();
+    });
+  };
+  wireMobBtn('mob-quick-buy', 'buy');
+  wireMobBtn('mob-quick-sell', 'sell');
+
+  /* Haptic on the main ticket submit (in addition to mobile bar) */
+  if(submitBtn){
+    submitBtn.addEventListener('click', () => haptic(12), { passive: true });
+  }
+
+  /* Pull-to-refresh: drag down at top of page → refresh tournaments + leaderboard + stats */
+  if(isMobile()){
+    const ptr = document.getElementById('mob-ptr');
+    const ptrText = document.getElementById('mob-ptr-text');
+    let startY = 0, pulling = false, dist = 0;
+    const THRESHOLD = 70;
+
+    document.addEventListener('touchstart', (e) => {
+      if(window.scrollY > 2) return;
+      // Don't trigger if user is interacting with a scrollable inner element
+      const inScroller = e.target.closest('.term-tabs, .info-body, .modal-overlay');
+      if(inScroller) return;
+      startY = e.touches[0].clientY;
+      pulling = true;
+      dist = 0;
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if(!pulling) return;
+      dist = e.touches[0].clientY - startY;
+      if(dist > 12 && window.scrollY <= 2){
+        ptr.classList.add('show');
+        if(ptrText) ptrText.textContent = dist >= THRESHOLD ? 'Release to refresh' : 'Pull to refresh';
+      } else {
+        ptr.classList.remove('show');
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', async () => {
+      if(!pulling){ return; }
+      const trigger = dist >= THRESHOLD && window.scrollY <= 2;
+      pulling = false; dist = 0;
+      if(!trigger){ ptr.classList.remove('show'); return; }
+      // Refreshing
+      if(ptrText) ptrText.textContent = 'Refreshing…';
+      ptr.classList.add('spin', 'show');
+      haptic(20);
+      try {
+        await Promise.allSettled([
+          (typeof refreshTournsFromDB === 'function') ? refreshTournsFromDB() : null,
+          (typeof renderLeaders === 'function') ? renderLeaders() : null,
+          (typeof pbRefreshStats === 'function') ? pbRefreshStats() : null,
+          (typeof pbFetchAnchors === 'function') ? pbFetchAnchors() : null,
+        ]);
+      } catch {}
+      if(ptrText) ptrText.textContent = 'Up to date';
+      setTimeout(() => {
+        ptr.classList.remove('show', 'spin');
+      }, 800);
+    });
+  }
+
+  /* Swipe between terminal tabs (horizontal flick on .term-tabs container) */
+  (function swipeTermTabs(){
+    if(!isMobile()) return;
+    const tabsRow = document.querySelector('.term-tabs');
+    if(!tabsRow) return;
+    let sx = 0, sy = 0, locked = false;
+    const all = () => Array.from(tabsRow.querySelectorAll('button'));
+    const activeIdx = () => {
+      const arr = all();
+      const i = arr.findIndex(b => b.classList.contains('active'));
+      return i < 0 ? 0 : i;
+    };
+    tabsRow.addEventListener('touchstart', (e) => {
+      sx = e.touches[0].clientX; sy = e.touches[0].clientY; locked = false;
+    }, { passive: true });
+    tabsRow.addEventListener('touchmove', (e) => {
+      const dx = e.touches[0].clientX - sx;
+      const dy = e.touches[0].clientY - sy;
+      if(!locked && Math.abs(dx) > 20 && Math.abs(dx) > Math.abs(dy) * 1.4){ locked = true; }
+    }, { passive: true });
+    tabsRow.addEventListener('touchend', (e) => {
+      if(!locked) return;
+      const dx = (e.changedTouches[0].clientX - sx);
+      if(Math.abs(dx) < 36) return;
+      const arr = all();
+      let i = activeIdx();
+      i = dx < 0 ? Math.min(arr.length - 1, i + 1) : Math.max(0, i - 1);
+      arr[i].click();
+      haptic(8);
+    });
+  })();
+
+  /* Mobile section reveal — fade up sections as they enter viewport */
+  if(isMobile() && 'IntersectionObserver' in window){
+    const obs = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){ e.target.classList.add('in-view'); obs.unobserve(e.target); }
+      });
+    }, { threshold: 0.08 });
+    document.querySelectorAll('.section').forEach(s => {
+      // Hero variant + above-fold sections should always show
+      if(s.id === 'hero2' || s.classList.contains('hero2')) s.classList.add('always-show');
+      else obs.observe(s);
+    });
+  }
+
+  /* Disable cursor parallax / aura code paths on touch (already done in their inits)
+     and lower particle count on phones with very low memory */
+  if(navigator.deviceMemory && navigator.deviceMemory <= 2){
+    document.documentElement.classList.add('low-end');
+  }
+})();
 
 /* Supabase session + live data */
 pbInit();
