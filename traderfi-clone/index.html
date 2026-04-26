@@ -1941,7 +1941,7 @@ body{
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
     </button>
     <div class="welcome-stats">
-      <div class="w-s"><span class="dot" style="background:var(--g1);box-shadow:0 0 8px var(--g-glow);"></span><b id="w-players">2,481</b><small>Playing</small></div>
+      <div class="w-s"><span class="dot" style="background:var(--g1);box-shadow:0 0 8px var(--g-glow);"></span><b id="w-players">—</b><small>Playing</small></div>
       <div class="w-s"><span class="dot" style="background:var(--c1);box-shadow:0 0 8px var(--c-glow);"></span><b id="w-tourns">—</b><small>Live rooms</small></div>
     </div>
     <div style="font-size:44px;text-align:center;margin-bottom:10px;" aria-hidden="true">🐶</div>
@@ -1962,7 +1962,7 @@ body{
       </button>
     </div>
     <div class="welcome-feats">
-      <span>🪙 <b>$100k</b> virtual balance</span><span class="sep">·</span>
+      <span>🪙 <b>₹1,00,000</b> virtual balance</span><span class="sep">·</span>
       <span>⚡ <b>5-min</b> tournaments</span><span class="sep">·</span>
       <span>🏆 <b>Real</b> rankings</span>
     </div>
@@ -2633,6 +2633,7 @@ function pbRenderStats(s){
   set('live-tourns',  tlive);
   set('s-players',    players);
   set('s-tourns',     tall);  // hero shows total tournaments (more honest "5 live tournaments" feel)
+  set('w-players',    players);
   set('w-tourns',     tlive);
 }
 async function pbRefreshStats(){
