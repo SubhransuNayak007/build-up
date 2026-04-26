@@ -2033,9 +2033,8 @@ body{
     </button>
     <h2 id="auth-title" style="text-align:center;"><em>Sign in</em> to PitBull</h2>
     <p class="lead" style="text-align:center;">Save your rank, join tournaments, and invite friends.</p>
-    <div class="auth-oauth">
-      <button type="button" id="btn-oauth-google" onclick="pbStartOAuth('google')"><svg class="ic" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 7.9-21l5.7-5.7C33.6 6 29 4 24 4A20 20 0 1 0 44 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.9 2.9l5.7-5.7C33.6 6 29 4 24 4A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5 0 9.5-1.9 12.9-5l-6-4.9a12 12 0 0 1-6.9 2.1c-5.3 0-9.7-3.4-11.3-8l-6.6 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.4l6 4.9A20 20 0 0 0 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>Google</button>
-      <button type="button" id="btn-oauth-discord" onclick="pbStartOAuth('discord')"><svg class="ic" viewBox="0 0 24 24" fill="#5865F2"><path d="M20.3 4.4A19 19 0 0 0 15.4 3l-.2.5c1.7.4 2.5 1 3.4 1.8a11 11 0 0 0-12.4 0c1-.8 2-1.4 3.6-1.8L9.5 3a19 19 0 0 0-5 1.4A21 21 0 0 0 1 16s2 3 5 3c0 0 .6-.6 1-1.2-1.6-.5-2.3-1.5-2.3-1.5l.6.4.1.1.1.1a9.3 9.3 0 0 0 3.2 1.3 9 9 0 0 0 5.3 0 8.6 8.6 0 0 0 3-1l.6-.5s-.7 1-2.4 1.6c.4.6 1 1.2 1 1.2 3 0 5-3 5-3 0-3.3-.9-7.6-3-11.6zM9 14.1c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7c0 1-.6 1.7-1.4 1.7zm6 0c-.8 0-1.4-.8-1.4-1.7 0-1 .6-1.7 1.4-1.7s1.4.7 1.4 1.7-.6 1.7-1.4 1.7z"/></svg>Discord</button>
+    <div class="auth-oauth" style="grid-template-columns:1fr;">
+      <button type="button" id="btn-oauth-google" onclick="pbStartOAuth('google')"><svg class="ic" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.6-6 8-11.3 8a12 12 0 1 1 7.9-21l5.7-5.7C33.6 6 29 4 24 4A20 20 0 1 0 44 24c0-1.2-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3 0 5.7 1.1 7.9 2.9l5.7-5.7C33.6 6 29 4 24 4A20 20 0 0 0 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5 0 9.5-1.9 12.9-5l-6-4.9a12 12 0 0 1-6.9 2.1c-5.3 0-9.7-3.4-11.3-8l-6.6 5A20 20 0 0 0 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.4l6 4.9A20 20 0 0 0 44 24c0-1.2-.1-2.4-.4-3.5z"/></svg>Continue with Google</button>
     </div>
     <div id="oauth-note" style="display:none;font-size:11.5px;color:var(--t3);text-align:center;margin:-10px 0 14px;line-height:1.5;"></div>
     <div class="auth-divider">or with email</div>
@@ -2741,14 +2740,8 @@ async function pbRefreshOAuthStatus(){
       }
     }
     if(dBtn){
-      if(!s.discord){
-        dBtn.disabled = true; dBtn.style.opacity = 0.55; dBtn.style.cursor = 'not-allowed';
-        dBtn.title = 'Discord OAuth not configured yet';
-        missing.push('Discord');
-      } else {
-        dBtn.disabled = false; dBtn.style.opacity = ''; dBtn.style.cursor = '';
-        dBtn.title = '';
-      }
+      // Discord button removed from UI; keep stub for safety
+      dBtn.style.display = 'none';
     }
     if(note){
       if(missing.length){
