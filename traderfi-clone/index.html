@@ -643,9 +643,9 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       <div class="nav-spacer"></div>
       <div class="nav-live" aria-live="polite">
         <span class="dot"></span>
-        <div><b id="live-players">2,481</b> <small>playing</small></div>
+        <div><b id="live-players">—</b> <small>players</small></div>
         <span class="sep"></span>
-        <div><b id="live-tourns">43</b> <small>live</small></div>
+        <div><b id="live-tourns">—</b> <small>live</small></div>
       </div>
       <button class="btn btn-ghost" id="btn-signin" type="button">Sign in</button>
       <button class="btn btn-primary" id="btn-start" type="button">
@@ -677,7 +677,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           <span class="line">Trade the markets.</span>
           <span class="line"><em>Zero risk.</em> All glory.</span>
         </h1>
-        <p>Start with $100,000 in virtual capital, enter 5-minute tournaments, and compete against thousands of players worldwide. Sharpen real trading instincts without risking a cent of your own money.</p>
+        <p>Start with $100,000 in virtual capital, enter 5-minute tournaments, and compete against other players worldwide. Sharpen real trading instincts without risking a cent of your own money.</p>
         <div class="hero-cta">
           <button class="btn btn-primary" id="btn-hero-start" type="button">
             Play Solo Now
@@ -689,8 +689,8 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           </button>
         </div>
         <div class="hero-stats">
-          <div class="hero-stat"><b id="s-players">2,481</b><small>Playing now</small></div>
-          <div class="hero-stat"><b id="s-tourns">43</b><small>Live tournaments</small></div>
+          <div class="hero-stat"><b id="s-players">—</b><small>Players signed up</small></div>
+          <div class="hero-stat"><b id="s-tourns">—</b><small>Live tournaments</small></div>
           <div class="hero-stat"><b>$100K</b><small>Virtual balance</small></div>
         </div>
       </div>
@@ -1060,7 +1060,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
     </button>
     <div class="welcome-stats">
       <div class="w-s"><span class="dot" style="background:var(--g1);box-shadow:0 0 8px var(--g-glow);"></span><b id="w-players">2,481</b><small>Playing</small></div>
-      <div class="w-s"><span class="dot" style="background:var(--c1);box-shadow:0 0 8px var(--c-glow);"></span><b id="w-tourns">43</b><small>Live rooms</small></div>
+      <div class="w-s"><span class="dot" style="background:var(--c1);box-shadow:0 0 8px var(--c-glow);"></span><b id="w-tourns">—</b><small>Live rooms</small></div>
     </div>
     <div style="font-size:44px;text-align:center;margin-bottom:10px;" aria-hidden="true">🐶</div>
     <h2 id="welcome-title" style="text-align:center;">Welcome to <em>PitBull</em></h2>
@@ -1397,6 +1397,29 @@ async function pbFetchLeaderboard(limit=25){
   catch { return null; }
 }
 
+/* Real header / hero pills — backed by /api/stats. */
+async function pbFetchStats(){
+  if(!PB_LIVE) return null;
+  try { return await pbApi('/api/stats'); }
+  catch { return null; }
+}
+function pbRenderStats(s){
+  const dash = '—';
+  const players = (s && Number.isFinite(s.users_total)) ? s.users_total.toLocaleString('en-US') : dash;
+  const tlive   = (s && Number.isFinite(s.tournaments_live)) ? s.tournaments_live.toLocaleString('en-US') : dash;
+  const tall    = (s && Number.isFinite(s.tournaments_total)) ? s.tournaments_total.toLocaleString('en-US') : dash;
+  const set = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('live-players', players);
+  set('live-tourns',  tlive);
+  set('s-players',    players);
+  set('s-tourns',     tall);  // hero shows total tournaments (more honest "5 live tournaments" feel)
+  set('w-tourns',     tlive);
+}
+async function pbRefreshStats(){
+  const s = await pbFetchStats();
+  pbRenderStats(s);
+}
+
 /* Update header signed-in state */
 function pbRenderAuthChip(){
   const btn = document.getElementById('btn-signin');
@@ -1429,6 +1452,8 @@ async function pbInit(){
     await pbLoadProfile();
   }
   pbRenderAuthChip();
+  pbRefreshStats();
+  setInterval(pbRefreshStats, 30000);  // poll every 30s
 }
 
 /* ══════════════════════════════════════════════════════════════
