@@ -2359,10 +2359,33 @@ if(PB_LIVE){
   setInterval(() => { refreshTournsFromDB(); renderLeaders(); }, 45000);
 }
 
-/* PWA: register service worker so the app is installable on Android / iOS / Windows */
+/* PWA: register service worker (installable on Android / iOS / Windows).
+   Auto-update strategy: on every load, register, force an update check, and
+   when a new SW takes control, reload once so users always see the newest build. */
 if('serviceWorker' in navigator){
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(err => console.warn('[PitBull] SW register failed', err));
+  window.addEventListener('load', async () => {
+    try {
+      const reg = await navigator.serviceWorker.register('sw.js');
+      reg.update().catch(() => {});
+      // If a waiting SW is queued, tell it to take over immediately
+      if(reg.waiting) reg.waiting.postMessage('SKIP_WAITING');
+      reg.addEventListener('updatefound', () => {
+        const sw = reg.installing;
+        if(!sw) return;
+        sw.addEventListener('statechange', () => {
+          if(sw.state === 'installed' && navigator.serviceWorker.controller){
+            sw.postMessage('SKIP_WAITING');
+          }
+        });
+      });
+      let reloaded = false;
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if(reloaded) return; reloaded = true;
+        location.reload();
+      });
+    } catch(err){
+      console.warn('[PitBull] SW register failed', err);
+    }
   });
 }
 
