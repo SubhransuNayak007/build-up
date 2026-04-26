@@ -387,9 +387,12 @@ svg{display:block;}
 .chart-price span{display:inline-flex;align-items:center;gap:4px;font-size:13px;margin-top:2px;}
 .chart-price span.up{color:var(--g1);}
 .chart-price span.down{color:var(--r1);}
-.chart-tf{display:flex;gap:4px;padding:0 18px 12px;}
-.chart-tf button{padding:6px 10px;font-size:12px;font-weight:600;color:var(--t3);border-radius:6px;text-transform:uppercase;letter-spacing:0.08em;}
-.chart-tf button.active{color:var(--t1);background:var(--glass);}
+.chart-tf{display:flex;gap:4px;padding:0 18px 12px;flex-wrap:wrap;}
+.chart-tf button{padding:6px 10px;font-size:12px;font-weight:600;color:var(--t3);border-radius:6px;text-transform:uppercase;letter-spacing:0.08em;transition:.18s color,.18s background;}
+.chart-tf button.active{color:var(--t1);background:var(--glass);box-shadow:inset 0 0 0 1px rgba(124,58,237,0.45);}
+.chart-tf button:hover:not(.active){color:var(--t2);background:rgba(255,255,255,0.03);}
+#arena-chart{transition:opacity 180ms ease,filter 180ms ease;}
+#arena-chart.tf-swap{opacity:0.25;filter:blur(2px);}
 #arena-chart{flex:1;width:100%;min-height:360px;}
 
 /* Order ticket */
@@ -423,6 +426,20 @@ svg{display:block;}
 .ticket-submit:hover{transform:translateY(-1px);box-shadow:0 8px 24px -6px var(--g-glow);}
 .ticket-submit.sell{background:linear-gradient(180deg,rgba(255,79,112,0.4),rgba(255,79,112,0.2));color:var(--r1);border-color:rgba(255,79,112,0.5);}
 .ticket-submit.sell:hover{box-shadow:0 8px 24px -6px var(--r-glow);}
+.ticket-otype{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:3px;background:var(--glass);border-radius:9px;border:1px solid var(--border);}
+.ticket-otype .otype-btn{padding:7px;font-size:11px;font-weight:600;letter-spacing:0.10em;text-transform:uppercase;border-radius:6px;color:var(--t3);transition:.18s;}
+.ticket-otype .otype-btn.active{color:var(--t1);background:var(--glass-2);box-shadow:inset 0 0 0 1px rgba(124,58,237,0.45);}
+.ticket-otype .otype-btn:hover:not(.active){color:var(--t2);}
+.ticket-hint{font-size:10.5px;color:var(--t3);line-height:1.4;}
+
+/* Pending limit orders header inside Orders tab */
+.pending-head{padding:10px 14px;font-size:11px;color:#ffd55a;letter-spacing:0.12em;text-transform:uppercase;font-weight:700;border-bottom:1px solid rgba(255,213,90,0.18);background:rgba(255,180,40,0.06);display:flex;justify-content:space-between;align-items:center;}
+.pending-head .badge{background:#ffd55a;color:#1a0f00;padding:2px 7px;border-radius:999px;font-size:10px;font-weight:800;}
+.pending-row{display:grid;grid-template-columns:1fr 60px 1fr 1fr 1fr 70px;gap:8px;padding:9px 14px;font-size:12px;align-items:center;border-bottom:1px solid var(--border);}
+.pending-row .b-cancel{padding:5px 9px;font-size:10.5px;font-weight:700;border-radius:6px;background:rgba(255,79,112,0.12);color:var(--r1);border:1px solid rgba(255,79,112,0.25);text-transform:uppercase;letter-spacing:0.08em;}
+.pending-row .b-cancel:hover{background:rgba(255,79,112,0.22);}
+.pending-row .side-buy{color:var(--g1);font-weight:700;}
+.pending-row .side-sell{color:var(--r1);font-weight:700;}
 
 /* Positions */
 .positions{padding:16px 18px;border-top:1px solid var(--border);}
@@ -568,6 +585,90 @@ svg{display:block;}
 /* ──────────── Tournaments ──────────── */
 .tourn-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:28px;}
 @media (max-width:960px){.tourn-grid{grid-template-columns:1fr;}}
+
+/* ───────── Portfolio dashboard ───────── */
+.port-top{display:grid;grid-template-columns:1.4fr 1fr;gap:16px;margin-bottom:24px;}
+@media (max-width:960px){.port-top{grid-template-columns:1fr;}}
+.port-equity-card{background:linear-gradient(180deg,rgba(124,58,237,0.08),rgba(8,5,26,0.6));border:1px solid var(--border);border-radius:18px;padding:22px;}
+.pec-head{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:14px;margin-bottom:18px;}
+.pec-lbl{display:block;font-size:11px;text-transform:uppercase;letter-spacing:0.16em;color:var(--t3);margin-bottom:4px;}
+.pec-head b{font-family:var(--mono);font-size:28px;color:var(--t1);}
+.pec-pill{text-align:right;padding:10px 16px;border-radius:12px;background:var(--glass);border:1px solid var(--border);}
+.pec-pill.profit{border-color:rgba(16,227,155,0.4);background:rgba(16,227,155,0.08);}
+.pec-pill.loss{border-color:rgba(255,79,112,0.4);background:rgba(255,79,112,0.08);}
+.pec-pill b{font-size:20px;}
+.pec-pct{display:block;margin-top:2px;font-family:var(--mono);font-size:12px;color:var(--t3);}
+.pec-pill.profit .pec-pct{color:var(--g1);}
+.pec-pill.loss .pec-pct{color:var(--r1);}
+#equity-spark{width:100%;height:120px;display:block;border-radius:10px;background:rgba(0,0,0,0.18);}
+.pec-foot{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:12px;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.12em;}
+.pec-foot b{color:var(--t2);font-family:var(--mono);text-transform:none;letter-spacing:0;}
+
+.port-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;}
+.ps-card{padding:14px 16px;border-radius:14px;background:var(--glass);border:1px solid var(--border);display:flex;flex-direction:column;gap:4px;}
+.ps-lbl{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.14em;}
+.ps-card b{font-family:var(--mono);font-size:18px;color:var(--t1);}
+.ps-card.up b{color:var(--g1);}
+.ps-card.down b{color:var(--r1);}
+
+/* Gamification row */
+.game-row,.market-row{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:18px;}
+@media (max-width:960px){.game-row,.market-row{grid-template-columns:1fr;}}
+.game-card{background:linear-gradient(180deg,rgba(124,58,237,0.06),rgba(8,5,26,0.5));border:1px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;}
+.gc-head{display:flex;justify-content:space-between;align-items:center;gap:8px;}
+.gc-eyebrow{font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.16em;}
+.dc-reward{padding:3px 9px;border-radius:999px;background:rgba(255,213,90,0.14);color:#ffd55a;font-size:11px;font-weight:700;letter-spacing:0.06em;}
+.xp-card .gc-head b{font-family:var(--mono);font-size:28px;color:var(--p2);}
+.xp-title{margin-left:auto;font-size:12px;color:var(--t2);font-weight:600;}
+.xp-bar{height:10px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--p1),var(--c1));transition:width 600ms ease;}
+.xp-meta{font-size:11px;color:var(--t3);font-family:var(--mono);}
+.dc-text{font-size:14px;font-weight:600;color:var(--t1);line-height:1.5;}
+.dc-progress{height:8px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;}
+.dc-fill{height:100%;background:linear-gradient(90deg,#ffd55a,var(--g1));transition:width 600ms ease;}
+.dc-meta{font-size:11px;color:var(--t3);font-family:var(--mono);}
+.dc-done .dc-fill{background:linear-gradient(90deg,var(--g1),var(--c1));}
+.dc-done .dc-text{color:var(--g1);}
+.ach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.ach{aspect-ratio:1/1;border-radius:10px;background:var(--glass);border:1px solid var(--border);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px;text-align:center;transition:.2s;}
+.ach .ach-icon{font-size:20px;filter:grayscale(1);opacity:0.4;}
+.ach.unlocked{background:linear-gradient(180deg,rgba(255,213,90,0.18),rgba(124,58,237,0.10));border-color:rgba(255,213,90,0.45);}
+.ach.unlocked .ach-icon{filter:none;opacity:1;}
+.ach .ach-name{font-size:9px;color:var(--t3);text-align:center;line-height:1.2;text-transform:uppercase;letter-spacing:0.04em;}
+.ach.unlocked .ach-name{color:var(--t2);}
+
+/* News & bots & crash */
+.news-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;padding-right:4px;}
+.news-empty{font-size:13px;color:var(--t3);padding:18px 4px;text-align:center;}
+.news-item{padding:10px 12px;border-radius:8px;background:var(--glass);border:1px solid var(--border);font-size:12.5px;line-height:1.4;animation:newsIn .35s ease-out;}
+@keyframes newsIn{from{opacity:0;transform:translateY(-4px);}to{opacity:1;transform:translateY(0);}}
+.news-item.bull{border-left:3px solid var(--g1);}
+.news-item.bear{border-left:3px solid var(--r1);}
+.news-item .nh{font-weight:700;color:var(--t1);}
+.news-item .nm{color:var(--t3);font-size:11px;font-family:var(--mono);}
+.bots-list{display:flex;flex-direction:column;gap:6px;}
+.bot-row{display:grid;grid-template-columns:24px 1fr auto auto;align-items:center;gap:10px;padding:8px 10px;border-radius:8px;background:var(--glass);border:1px solid var(--border);}
+.bot-rank{font-family:var(--mono);font-size:11px;color:var(--t3);}
+.bot-rank.gold{color:#ffd55a;}
+.bot-name{font-size:12.5px;font-weight:600;}
+.bot-name small{display:block;color:var(--t3);font-size:10px;font-weight:400;}
+.bot-pnl{font-family:var(--mono);font-size:13px;}
+.bot-pnl.up{color:var(--g1);}
+.bot-pnl.down{color:var(--r1);}
+.bot-trades{font-family:var(--mono);font-size:10.5px;color:var(--t3);}
+.mode-text{font-size:13px;line-height:1.5;color:var(--t2);}
+#mode-pill.crash{background:rgba(255,79,112,0.2);color:var(--r1);animation:crashPulse 1.2s ease-in-out infinite;}
+@keyframes crashPulse{0%,100%{opacity:1;}50%{opacity:0.55;}}
+
+/* Trade history */
+.port-history{margin-top:18px;background:rgba(8,5,26,0.4);border:1px solid var(--border);border-radius:16px;overflow:hidden;}
+.ph-head{padding:14px 18px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);}
+.ph-head h3{font-size:14px;letter-spacing:0.04em;}
+.ph-table-wrap{max-height:340px;overflow-y:auto;}
+
+/* XP toast */
+.xp-toast{position:fixed;top:80px;right:20px;z-index:200;padding:10px 16px;border-radius:12px;background:linear-gradient(135deg,rgba(124,58,237,0.95),rgba(89,201,255,0.85));color:#fff;font-size:13px;font-weight:700;letter-spacing:0.04em;box-shadow:0 12px 36px -8px rgba(124,58,237,0.6);animation:xpToast 2.4s ease-out forwards;pointer-events:none;}
+@keyframes xpToast{0%{opacity:0;transform:translateY(-12px);}10%{opacity:1;transform:translateY(0);}80%{opacity:1;transform:translateY(0);}100%{opacity:0;transform:translateY(-8px);}}
 .tourn{
   padding:20px;border-radius:var(--r-lg);
   background:linear-gradient(160deg,rgba(22,14,56,0.85),rgba(10,7,32,0.9));
@@ -682,6 +783,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       </a>
       <div class="nav-links" role="menubar">
         <a href="#arena" role="menuitem">Trade</a>
+        <a href="#portfolio" role="menuitem">Portfolio</a>
         <a href="#tournaments" role="menuitem">Tournaments</a>
         <a href="#leaderboard" role="menuitem">Leaderboard</a>
         <a href="#how" role="menuitem">How it works</a>
@@ -743,12 +845,12 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
       <div class="hero-preview" aria-hidden="true">
         <div class="hp-head">
           <div class="hp-sym">
-            <span class="icon">BT</span>
-            <div><b>BTCUSD</b><br><small>Bitcoin / USD</small></div>
+            <span class="icon">RE</span>
+            <div><b>RELIANCE</b><br><small>Reliance Industries · NSE</small></div>
           </div>
           <div class="hp-price">
-            <b id="hp-price">$64,812.40</b><br>
-            <span id="hp-change">▲ +1.87% (+$1,189.60)</span>
+            <b id="hp-price">₹2,948.10</b><br>
+            <span id="hp-change">▲ +0.83% (+₹24.30)</span>
           </div>
         </div>
         <div id="hero-chart"></div>
@@ -816,7 +918,7 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             <span class="lbl">Balance</span><b id="balance">₹1,00,000.00</b>
           </div>
           <div class="balance-pill" id="pnl-pill">
-            <span class="lbl">P&amp;L</span><b id="pnl">$0.00</b>
+            <span class="lbl">P&amp;L</span><b id="pnl">+₹0.00</b>
           </div>
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;">
@@ -865,11 +967,13 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             </div>
           </div>
           <div class="chart-tf" role="tablist" aria-label="Timeframe">
-            <button class="active" data-tf="1000"  data-tf-label="1s"  role="tab">1s</button>
-            <button                data-tf="1500"  data-tf-label="5s"  role="tab">5s</button>
-            <button                data-tf="2500"  data-tf-label="15s" role="tab">15s</button>
-            <button                data-tf="4000"  data-tf-label="1m"  role="tab">1m</button>
-            <button                data-tf="6000"  data-tf-label="5m"  role="tab">5m</button>
+            <button class="active" data-tf-key="5s"  role="tab" title="5-second bars">5s</button>
+            <button                data-tf-key="1m"  role="tab" title="1-minute bars">1m</button>
+            <button                data-tf-key="5m"  role="tab" title="5-minute bars">5m</button>
+            <button                data-tf-key="1h"  role="tab" title="1-hour bars">1h</button>
+            <button                data-tf-key="1d"  role="tab" title="Daily bars">1d</button>
+            <button                data-tf-key="1M"  role="tab" title="Monthly bars (last ~2.5 years)">1M</button>
+            <button                data-tf-key="10M" role="tab" title="Monthly bars (last ~10 years)">10M</button>
           </div>
           <div id="arena-chart"></div>
 
@@ -930,8 +1034,12 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
               </div>
             </div>
 
-            <!-- Orders tab (closed trade history) -->
+            <!-- Orders tab: pending limit orders + closed trade history -->
             <div class="term-pane" data-pane="orders">
+              <div id="pending-block" style="display:none;">
+                <div class="pending-head"><span>Pending limit orders <span class="badge" id="pending-count">0</span></span><span style="color:#ffd55a;font-size:10px;">Auto-fill on touch</span></div>
+                <div id="pending-list"></div>
+              </div>
               <table class="pos-table">
                 <thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Size</th><th>Entry</th><th>Exit</th><th>P&amp;L</th></tr></thead>
                 <tbody id="ord-body">
@@ -970,6 +1078,18 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
             <button class="buy active" data-side="buy" role="tab">▲ BUY</button>
             <button class="sell" data-side="sell" role="tab">▼ SELL</button>
           </div>
+          <div class="ticket-otype" role="tablist" aria-label="Order type">
+            <button class="otype-btn active" data-otype="market" type="button" role="tab" title="Fill instantly at current mark">Market</button>
+            <button class="otype-btn"        data-otype="limit"  type="button" role="tab" title="Fill only when price hits your limit">Limit</button>
+          </div>
+          <div class="ticket-field" id="limit-field" style="display:none;">
+            <label>Limit price</label>
+            <div class="ticket-input">
+              <input id="limit-input" type="number" value="0" min="0" step="0.01" placeholder="0.00">
+              <span style="color:var(--t3);padding:0 10px;font-family:var(--mono);" id="limit-curr">₹</span>
+            </div>
+            <small class="ticket-hint" id="limit-hint">Order parks until price reaches this level.</small>
+          </div>
           <div class="ticket-field">
             <label>Size (₹)</label>
             <div class="ticket-input">
@@ -999,6 +1119,101 @@ footer{padding:40px 0 28px;border-top:1px solid var(--border);margin-top:80px;}
           <button class="ticket-submit" id="ticket-submit" type="button">Open long · BUY</button>
           <p style="font-size:11px;color:var(--t3);text-align:center;">Paper trading. No real money at risk. <a href="#" style="color:var(--c1);">Learn more →</a></p>
         </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════ Portfolio dashboard ══════════ -->
+<section class="section" id="portfolio">
+  <div class="wrap">
+    <div style="margin-bottom:24px;">
+      <span class="section-eyebrow">My Portfolio</span>
+      <h2 class="section-title">Track your <span class="grad">edge</span>, round after round.</h2>
+      <p class="section-lead">Live snapshot of your equity, today's P&amp;L, win-rate, and trade history. Updates every tick as the market moves.</p>
+    </div>
+
+    <div class="port-top">
+      <div class="port-equity-card">
+        <div class="pec-head">
+          <div>
+            <span class="pec-lbl">Total equity</span>
+            <b id="pec-equity">₹1,00,000.00</b>
+          </div>
+          <div class="pec-pill" id="pec-pnl-pill">
+            <span class="pec-lbl">Today's P&amp;L</span>
+            <b id="pec-pnl">+₹0.00</b>
+            <span id="pec-pnl-pct" class="pec-pct">+0.00%</span>
+          </div>
+        </div>
+        <canvas id="equity-spark" height="120"></canvas>
+        <div class="pec-foot">
+          <span>Tracking <b id="pec-samples">0</b> ticks</span>
+          <span>Anchored to NSE close · <b id="pec-anchor">today</b></span>
+        </div>
+      </div>
+
+      <div class="port-stats">
+        <div class="ps-card"><span class="ps-lbl">Trades</span><b id="ps-trades">0</b></div>
+        <div class="ps-card"><span class="ps-lbl">Win rate</span><b id="ps-winrate">—</b></div>
+        <div class="ps-card up"><span class="ps-lbl">Wins</span><b id="ps-wins">0</b></div>
+        <div class="ps-card down"><span class="ps-lbl">Losses</span><b id="ps-losses">0</b></div>
+        <div class="ps-card"><span class="ps-lbl">Best trade</span><b id="ps-best">—</b></div>
+        <div class="ps-card"><span class="ps-lbl">Worst trade</span><b id="ps-worst">—</b></div>
+      </div>
+    </div>
+
+    <!-- Gamification row: XP + daily challenge + achievements -->
+    <div class="game-row">
+      <div class="game-card xp-card">
+        <div class="gc-head">
+          <span class="gc-eyebrow">Level</span>
+          <b id="xp-level">1</b>
+          <span class="xp-title" id="xp-title">Rookie Trader</span>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="xp-fill" style="width:0%;"></div></div>
+        <div class="xp-meta"><span id="xp-cur">0</span> / <span id="xp-max">100</span> XP · <span id="xp-toast-hint">earn XP by trading</span></div>
+      </div>
+
+      <div class="game-card challenge-card">
+        <div class="gc-head"><span class="gc-eyebrow">Daily challenge</span><span class="dc-reward" id="dc-reward">+50 XP</span></div>
+        <div class="dc-text" id="dc-text">Loading…</div>
+        <div class="dc-progress"><div class="dc-fill" id="dc-fill" style="width:0%;"></div></div>
+        <div class="dc-meta" id="dc-meta">—</div>
+      </div>
+
+      <div class="game-card achievements-card">
+        <div class="gc-head"><span class="gc-eyebrow">Achievements</span><span id="ach-count" class="dc-reward">0/8</span></div>
+        <div class="ach-grid" id="ach-grid"></div>
+      </div>
+    </div>
+
+    <!-- News feed + AI traders + market mode -->
+    <div class="market-row">
+      <div class="game-card news-card">
+        <div class="gc-head"><span class="gc-eyebrow">📰 Market news (sim)</span><span id="news-count" class="dc-reward">0 events</span></div>
+        <div class="news-list" id="news-list"><div class="news-empty">News events will appear here as the simulated market moves.</div></div>
+      </div>
+      <div class="game-card aibots-card">
+        <div class="gc-head"><span class="gc-eyebrow">🤖 AI traders</span><span class="dc-reward">live ranking</span></div>
+        <div class="bots-list" id="bots-list"></div>
+      </div>
+      <div class="game-card crash-card">
+        <div class="gc-head"><span class="gc-eyebrow">⚡ Market mode</span><span id="mode-pill" class="dc-reward">Normal</span></div>
+        <div class="mode-text">Trigger a temporary high-volatility shock to test your nerves. Lasts ~30 seconds; all symbols swing wildly.</div>
+        <button class="btn btn-danger" type="button" id="btn-crash" style="margin-top:12px;">⚡ Trigger crash event</button>
+        <small style="color:var(--t3);font-size:11px;margin-top:6px;display:block;">Or wait — crashes also fire randomly during news events.</small>
+      </div>
+    </div>
+
+    <!-- Trade history (full) -->
+    <div class="port-history">
+      <div class="ph-head"><h3>Trade history</h3><span id="ph-count" class="dc-reward">0 trades</span></div>
+      <div class="ph-table-wrap">
+        <table class="pos-table">
+          <thead><tr><th>Time</th><th>Symbol</th><th>Side</th><th>Size</th><th>Entry</th><th>Exit</th><th>P&amp;L</th></tr></thead>
+          <tbody id="ph-body"><tr><td class="empty" colspan="7">Your closed trades will appear here.</td></tr></tbody>
+        </table>
       </div>
     </div>
   </div>
@@ -1512,9 +1727,10 @@ const state = {
   activeSym: 'RELIANCE',
   side: 'buy',
   roundSeconds: 5 * 60,
-  tfMs: 1000, // chart tick interval (1s default)
-  tfLabel: '1s',
+  tf: '5s', // active timeframe key—see TIMEFRAMES table
   orders: [], // closed-trade history
+  pending: [], // pending limit orders {id, sym, side, size, lev, qty, limit, placedAt}
+  orderType: 'market', // 'market' | 'limit'
   instruments: [
     // Indian indices (Groww-style terminal header)
     {sym:'NIFTY',    name:'Nifty 50',            cat:'indices', price:23897.95, color:'#00b386', curr:'₹'},
@@ -1638,6 +1854,9 @@ function pbFlash(kind='neut'){
   document.body.appendChild(el);
   setTimeout(() => el.remove(), 700);
 }
+// Gamification stub — actual XP system defined in Phase 6 below.
+let pbAddXP = function(){};
+
 function pbTradeFeedback(kind, pnl){
   // kind: 'open-buy' | 'open-sell' | 'close'
   if(kind === 'open-buy')      { pbBeep('buy');  pbFlash('neut'); }
@@ -1651,9 +1870,9 @@ function pbTradeFeedback(kind, pnl){
 /* ══════════════════════════════════════════════════════════════
    Ticker strip
    ══════════════════════════════════════════════════════════════ */
-(function renderTicker(){
+function renderTicker(){
   const track = document.getElementById('ticker-track');
-  // Favor indices first (Groww terminal vibe), then top movers from each cat
+  if(!track) return;
   const indices = state.instruments.filter(i=>i.cat==='indices');
   const top = state.instruments.filter(i=>i.cat!=='indices').slice(0,14);
   const picks = [...indices, ...top];
@@ -1662,24 +1881,50 @@ function pbTradeFeedback(kind, pnl){
     return `<span class="ticker-item"><span class="ticker-dot" style="background:${i.color}"></span><b>${i.sym}</b> ${i.curr}${fmt(i.price)} <span class="${up?'ticker-up':'ticker-down'}">${up?'▲':'▼'} ${fmtPct(pct)}</span></span>`;
   }).join('');
   track.innerHTML = rows;
-})();
+}
+renderTicker();
 
 /* ══════════════════════════════════════════════════════════════
    Candle series generator
    ══════════════════════════════════════════════════════════════ */
-function genCandles(startPrice, count=180, volatility=0.004){
-  const data = []; let p = startPrice; let t = Math.floor(Date.now()/1000) - count;
+function genCandles(startPrice, count=180, volatility=0.004, barSec=1, endTs=null){
+  // Build `count` candles ending at endTs, working backwards so the LAST close ~= startPrice.
+  // Random walk + mean-reverting drift towards startPrice so wider lookbacks don't run away.
+  const out = []; let p = startPrice;
+  const end = endTs || Math.floor(Date.now()/1000);
+  const start = end - count*barSec;
+  // Build forward from a slightly-perturbed historical anchor for realism
+  let cursor = startPrice * (1 + (Math.random()-0.5)*volatility*Math.sqrt(count)*0.3);
   for(let i=0;i<count;i++){
-    const o = p;
-    const drift = (Math.random()-0.5)*volatility*p;
-    const c = Math.max(0.0001, o + drift);
-    const h = Math.max(o,c) + Math.random()*volatility*p*0.5;
-    const l = Math.min(o,c) - Math.random()*volatility*p*0.5;
-    data.push({time: t+i, open:o, high:h, low:l, close:c});
-    p = c;
+    const o = cursor;
+    const drift = (Math.random()-0.5)*volatility*o;
+    const reversion = (startPrice - o) * 0.03; // pull gently back to today's price
+    const c = Math.max(0.0001, o + drift + reversion);
+    const h = Math.max(o,c) + Math.random()*volatility*o*0.5;
+    const l = Math.min(o,c) - Math.random()*volatility*o*0.5;
+    out.push({time: start + i*barSec, open:o, high:h, low:l, close:c});
+    cursor = c;
   }
-  return data;
+  // Force the last close to match startPrice exactly so live trading state stays consistent
+  if(out.length){
+    const last = out[out.length-1];
+    last.close = startPrice;
+    last.high = Math.max(last.high, startPrice);
+    last.low  = Math.min(last.low,  startPrice);
+  }
+  return out;
 }
+
+// Per-timeframe config: bar duration, tick rate, lookback count, volatility multiplier
+const TIMEFRAMES = {
+  '5s' : { barSec: 5,           tickMs: 1000, bars: 120, volMul: 1.0 },
+  '1m' : { barSec: 60,          tickMs: 1500, bars: 120, volMul: 1.6 },
+  '5m' : { barSec: 300,         tickMs: 2000, bars: 120, volMul: 2.2 },
+  '1h' : { barSec: 3600,        tickMs: 2500, bars: 120, volMul: 3.0 },
+  '1d' : { barSec: 86400,       tickMs: 3500, bars: 120, volMul: 4.5 },
+  '1M' : { barSec: 30*86400,    tickMs: 4500, bars: 30,  volMul: 6.5 },
+  '10M': { barSec: 30*86400,    tickMs: 5500, bars: 120, volMul: 6.5 },
+};
 
 /* ══════════════════════════════════════════════════════════════
    Hero chart (mini)
@@ -1699,7 +1944,7 @@ function initHeroChart(){
     upColor:'#10e39b', downColor:'#ff4f70', borderVisible:false,
     wickUpColor:'#10e39b', wickDownColor:'#ff4f70',
   });
-  heroData = genCandles(64812.40, 90, 0.006);
+  heroData = genCandles(2948.10, 90, 0.006);
   heroSeries.setData(heroData);
   heroChart.timeScale().fitContent();
   window.addEventListener('resize', ()=>heroChart.applyOptions({width: el.clientWidth}));
@@ -1717,7 +1962,7 @@ function tickHero(){
   heroSeries.update(bar);
   const start = heroData[0].close;
   const chg = (c-start)/start*100;
-  const el = document.getElementById('hp-price'); if(el) el.textContent = '$'+fmt(c);
+  const el = document.getElementById('hp-price'); if(el) el.textContent = '₹'+c.toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});
   const ce = document.getElementById('hp-change'); if(ce){
     ce.textContent = (chg>=0?'▲ +':'▼ ') + fmt(Math.abs(chg)) + '%';
     ce.style.color = chg>=0 ? 'var(--g1)' : 'var(--r1)';
@@ -1749,21 +1994,38 @@ function initArenaChart(){
 let _tickTimer = null;
 function startTickLoop(){
   if(_tickTimer) clearInterval(_tickTimer);
-  _tickTimer = setInterval(tickArena, state.tfMs);
+  const tf = TIMEFRAMES[state.tf] || TIMEFRAMES['5s'];
+  _tickTimer = setInterval(tickArena, tf.tickMs);
 }
-function setTimeframe(ms, label, btn){
-  state.tfMs = ms;
-  state.tfLabel = label;
+function setTimeframe(key, btn){
+  if(!TIMEFRAMES[key]) return;
+  if(state.tf === key && btn && btn.classList.contains('active')) return;
+  state.tf = key;
   document.querySelectorAll('.chart-tf button').forEach(b=>b.classList.remove('active'));
   if(btn) btn.classList.add('active');
+  // Smooth crossfade: fade out, regenerate data, fade back in
+  const wrap = document.getElementById('arena-chart');
+  if(wrap) wrap.classList.add('tf-swap');
+  setTimeout(() => {
+    regenerateArenaData();
+    if(wrap) wrap.classList.remove('tf-swap');
+  }, 180);
   startTickLoop();
+}
+function regenerateArenaData(){
+  const inst = state.instruments.find(i=>i.sym===state.activeSym);
+  if(!inst) return;
+  const tf = TIMEFRAMES[state.tf] || TIMEFRAMES['5s'];
+  const baseVol = inst.cat==='fx' ? 0.0012 : (inst.cat==='indices' ? 0.0028 : 0.005);
+  const vol = baseVol * tf.volMul;
+  arenaData = genCandles(inst.price, tf.bars, vol, tf.barSec);
+  arenaSeries.setData(arenaData);
+  arenaChart.timeScale().fitContent();
 }
 function loadSymbol(sym){
   const inst = state.instruments.find(i=>i.sym===sym);
   state.activeSym = sym;
-  arenaData = genCandles(inst.price, 160, inst.cat==='fx'?0.0015:0.005);
-  arenaSeries.setData(arenaData);
-  arenaChart.timeScale().fitContent();
+  regenerateArenaData();
   // update headers
   const icon = document.getElementById('chart-icon');
   icon.textContent = sym.slice(0,2);
@@ -1774,22 +2036,30 @@ function loadSymbol(sym){
   updatePriceHeader();
   updateTicketSummary();
   updateDepth(true);
+  // Sync limit-price field hint to the new instrument's currency
+  const lc = document.getElementById('limit-curr');
+  const li = document.getElementById('limit-input');
+  if(lc) lc.textContent = inst.curr;
+  if(li && state.orderType === 'limit') li.value = inst.price.toFixed(2);
 }
 function tickArena(){
-  if(!arenaData) return;
+  if(!arenaData || !arenaData.length) return;
   const last = arenaData[arenaData.length-1];
   const inst = state.instruments.find(i=>i.sym===state.activeSym);
-  const vol = inst.cat==='fx' ? 0.001 : (inst.cat==='indices' ? 0.0025 : 0.004);
+  const tf = TIMEFRAMES[state.tf] || TIMEFRAMES['5s'];
+  const baseVol = inst.cat==='fx' ? 0.0012 : (inst.cat==='indices' ? 0.0028 : 0.005);
+  const vol = baseVol * tf.volMul;
   const o = last.close;
   const c = Math.max(0.0001, o + (Math.random()-0.5)*o*vol);
   const h = Math.max(o,c) + Math.random()*o*vol*0.6;
   const l = Math.min(o,c) - Math.random()*o*vol*0.6;
-  const bar = {time: last.time+1, open:o, high:h, low:l, close:c};
+  const bar = {time: last.time + tf.barSec, open:o, high:h, low:l, close:c};
   arenaData.push(bar);
-  if(arenaData.length>240) arenaData.shift();
+  if(arenaData.length > tf.bars + 60) arenaData.shift();
   arenaSeries.update(bar);
   inst.price = c;
   updatePriceHeader();
+  matchPendingOrders();
   updatePositions();
   updateDepth();
 }
@@ -1846,10 +2116,9 @@ document.getElementById('list-search').addEventListener('input', e=>{
 // Chart timeframe tabs
 document.querySelectorAll('.chart-tf button').forEach(b=>{
   b.addEventListener('click', ()=>{
-    const ms = parseInt(b.dataset.tf, 10) || 1000;
-    const label = b.dataset.tfLabel || b.textContent.trim();
-    setTimeframe(ms, label, b);
-    toast(`Timeframe · ${label}`, 'success');
+    const key = b.dataset.tfKey || b.textContent.trim();
+    setTimeframe(key, b);
+    toast(`Timeframe · ${key}`, 'success');
   });
 });
 
@@ -1866,13 +2135,37 @@ function setSide(side){
   state.side = side;
   document.querySelectorAll('.ticket-toggle button').forEach(x=>x.classList.toggle('active', x.dataset.side===side));
   const sub = document.getElementById('ticket-submit');
-  if(side==='buy'){ sub.textContent='Open long · BUY'; sub.classList.remove('sell'); }
-  else { sub.textContent='Open short · SELL'; sub.classList.add('sell'); }
+  updateTicketSubmitLabel();
   updateTicketSummary();
 }
 document.querySelectorAll('.ticket-toggle button').forEach(b=>{
   b.addEventListener('click', ()=>setSide(b.dataset.side));
 });
+
+/* Order type toggle (Market / Limit) */
+function setOrderType(t){
+  state.orderType = t;
+  document.querySelectorAll('.ticket-otype .otype-btn').forEach(x=>x.classList.toggle('active', x.dataset.otype===t));
+  const lf = document.getElementById('limit-field');
+  if(lf) lf.style.display = (t==='limit') ? 'flex' : 'none';
+  if(t === 'limit'){
+    // Prefill limit price near current mark
+    const inst = state.instruments.find(i=>i.sym===state.activeSym);
+    const li = document.getElementById('limit-input');
+    if(inst && li && (!li.value || li.value === '0')) li.value = inst.price.toFixed(2);
+  }
+  updateTicketSubmitLabel();
+}
+document.querySelectorAll('.ticket-otype .otype-btn').forEach(b=>{
+  b.addEventListener('click', ()=>setOrderType(b.dataset.otype));
+});
+function updateTicketSubmitLabel(){
+  const sub = document.getElementById('ticket-submit');
+  if(!sub) return;
+  const verb = state.orderType === 'limit' ? 'Place limit ' : 'Open ';
+  if(state.side === 'buy'){ sub.textContent = verb + (state.orderType==='limit' ? 'BUY' : 'long · BUY'); sub.classList.remove('sell'); }
+  else                    { sub.textContent = verb + (state.orderType==='limit' ? 'SELL' : 'short · SELL'); sub.classList.add('sell'); }
+}
 function updateTicketSummary(){
   const inst = state.instruments.find(i=>i.sym===state.activeSym);
   const size = parseFloat(sizeInput.value||0);
@@ -1884,23 +2177,115 @@ function updateTicketSummary(){
   const liq = state.side==='buy' ? inst.price*(1 - 0.95/lev) : inst.price*(1 + 0.95/lev);
   document.getElementById('sum-liq').textContent = inst.curr + fmt(liq);
 }
+function fillOrderAtPrice(inst, side, size, lev, fillPrice){
+  const qty = (size*lev)/fillPrice;
+  const pos = {
+    id: Date.now() + Math.floor(Math.random()*1000), sym:inst.sym, side, size, lev, qty,
+    entry: fillPrice, mark: inst.price
+  };
+  state.positions.unshift(pos);
+  state.balance -= size;
+  updatePositions();
+  pbTradeFeedback(side === 'buy' ? 'open-buy' : 'open-sell');
+  pbAddXP(5, side==='buy' ? 'Opened long' : 'Opened short');
+  return pos;
+}
+
 document.getElementById('ticket-submit').addEventListener('click', ()=>{
   const inst = state.instruments.find(i=>i.sym===state.activeSym);
   const size = parseFloat(sizeInput.value||0);
   const lev  = Math.max(1, parseFloat(levInput.value||1));
   if(size<=0){ toast('Enter a valid size', 'error'); return; }
   if(size > state.balance){ toast('Size exceeds balance', 'error'); return; }
-  const qty = (size*lev)/inst.price;
-  const pos = {
-    id: Date.now(), sym:inst.sym, side:state.side, size, lev, qty,
-    entry: inst.price, mark: inst.price
-  };
-  state.positions.unshift(pos);
-  state.balance -= size;
-  updatePositions();
-  pbTradeFeedback(state.side === 'buy' ? 'open-buy' : 'open-sell');
+
+  if(state.orderType === 'limit'){
+    const limitInput = document.getElementById('limit-input');
+    const limit = parseFloat(limitInput && limitInput.value || 0);
+    if(!(limit > 0)){ toast('Enter a valid limit price', 'error'); return; }
+    // Edge case: limit already crossed -> fill immediately at the better price
+    const wouldFillNow = state.side==='buy' ? inst.price <= limit : inst.price >= limit;
+    if(wouldFillNow){
+      fillOrderAtPrice(inst, state.side, size, lev, inst.price);
+      toast(`Limit ${state.side.toUpperCase()} ${inst.sym} filled instantly at ${inst.curr}${fmt(inst.price)}`, 'success');
+      return;
+    }
+    state.pending.unshift({
+      id: Date.now() + Math.floor(Math.random()*1000),
+      sym: inst.sym, side: state.side, size, lev, limit,
+      placedAt: new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit'})
+    });
+    renderPending();
+    toast(`Limit ${state.side.toUpperCase()} ${inst.sym} parked at ${inst.curr}${fmt(limit)}`, 'success');
+    return;
+  }
+
+  // Market order
+  fillOrderAtPrice(inst, state.side, size, lev, inst.price);
   toast((state.side==='buy'?'▲ Opened long ':'▼ Opened short ') + inst.sym + ' · ' + fmtUSD(size), 'success');
 });
+
+/* Limit-order matching engine: invoked from tickArena */
+function matchPendingOrders(){
+  if(!state.pending.length) return;
+  let fired = false;
+  for(let i = state.pending.length - 1; i >= 0; i--){
+    const o = state.pending[i];
+    const inst = state.instruments.find(x=>x.sym===o.sym);
+    if(!inst) continue;
+    const fills = o.side === 'buy' ? inst.price <= o.limit : inst.price >= o.limit;
+    if(!fills) continue;
+    if(o.size > state.balance){
+      // insufficient funds — cancel silently with a toast
+      state.pending.splice(i,1);
+      toast(`Limit ${o.side.toUpperCase()} ${o.sym} cancelled — insufficient balance`, 'error');
+      fired = true;
+      continue;
+    }
+    fillOrderAtPrice(inst, o.side, o.size, o.lev, o.limit);
+    state.pending.splice(i,1);
+    toast(`✓ Limit ${o.side.toUpperCase()} ${o.sym} filled at ${inst.curr}${fmt(o.limit)}`, 'success');
+    fired = true;
+  }
+  if(fired) renderPending();
+}
+
+function cancelPending(id){
+  const idx = state.pending.findIndex(p=>p.id===id);
+  if(idx < 0) return;
+  const o = state.pending[idx];
+  state.pending.splice(idx,1);
+  renderPending();
+  toast(`Cancelled limit ${o.side.toUpperCase()} ${o.sym}`, 'success');
+}
+
+function renderPending(){
+  const block = document.getElementById('pending-block');
+  const list = document.getElementById('pending-list');
+  const cnt = document.getElementById('pending-count');
+  if(!block || !list) return;
+  if(!state.pending.length){
+    block.style.display = 'none';
+    list.innerHTML = '';
+    if(cnt) cnt.textContent = '0';
+    return;
+  }
+  block.style.display = 'block';
+  if(cnt) cnt.textContent = state.pending.length;
+  list.innerHTML = state.pending.map(o=>{
+    const inst = state.instruments.find(x=>x.sym===o.sym);
+    const c = inst ? inst.curr : '₹';
+    const distance = inst ? ((inst.price - o.limit)/inst.price*100) : 0;
+    const distStr = (distance>=0?'+':'') + distance.toFixed(2) + '%';
+    return `<div class="pending-row">
+      <div><b>${o.sym}</b><br><small style="color:var(--t3);font-size:10px;">${o.placedAt}</small></div>
+      <span class="side-${o.side}">${o.side==='buy'?'BUY':'SELL'}</span>
+      <span style="font-family:var(--mono);">${fmtUSD(o.size)}</span>
+      <span style="font-family:var(--mono);">@ ${c}${fmt(o.limit)}</span>
+      <span style="font-family:var(--mono);color:var(--t3);font-size:11px;">mark ${distStr}</span>
+      <button class="b-cancel" type="button" onclick="cancelPending(${o.id})">Cancel</button>
+    </div>`;
+  }).join('');
+}
 
 /* ══════════════════════════════════════════════════════════════
    Positions
@@ -1972,6 +2357,7 @@ function closePosition(id){
   updatePositions();
   renderOrders();
   pbTradeFeedback('close', pnl);
+  if(typeof recordClosedTrade === 'function') recordClosedTrade(order);
   toast(`Closed ${p.sym} · ${pnl>=0?'+':''}${fmtUSD(pnl)}`, pnl>=0?'success':'error');
 }
 function closeAllPositions(){
@@ -1988,6 +2374,7 @@ function closeAllPositions(){
     };
     state.orders.unshift(order);
     pbInsertTrade(order);
+    if(typeof recordClosedTrade === 'function') recordClosedTrade(order);
   });
   state.positions = [];
   updatePositions();
@@ -2114,7 +2501,7 @@ document.querySelectorAll('.term-tab').forEach(btn=>{
     document.querySelectorAll('.term-pane').forEach(p=>p.classList.toggle('active', p.dataset.pane===tab));
   });
 });
-document.getElementById('btn-close-all').addEventListener('click', closeAllPositions);
+document.getElementById('btn-close-all').addEventListener('click', () => closeAllPositions());
 window.closePosition = closePosition;
 window.setSize = setSize;
 window.adjSize = adjSize;
@@ -2139,9 +2526,11 @@ document.getElementById('btn-reset').addEventListener('click', ()=>{
   state.pnl = 0;
   state.positions = [];
   state.orders = [];
+  state.pending = [];
   state.roundSeconds = 5*60;
   updatePositions();
   renderOrders();
+  renderPending();
   toast('Round reset. Balance restored to ₹1,00,000.', 'success');
 });
 
@@ -2451,6 +2840,513 @@ renderLeaders();
 document.getElementById('year').textContent = new Date().getFullYear();
 
 /* ══════════════════════════════════════════════════════════════
+   Phase 5/6/7: Portfolio · XP · Achievements · Daily challenge · AI · News · Crash
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Equity tracking ─────────────────────────────────────────── */
+const equityHistory = [];      // {t, equity}
+const STARTING_EQUITY = 100000;
+const EQUITY_MAX_POINTS = 240;
+
+function pushEquitySample(){
+  const equity = state.balance + state.pnl;
+  equityHistory.push({t: Date.now(), equity});
+  if(equityHistory.length > EQUITY_MAX_POINTS) equityHistory.shift();
+  drawEquitySpark();
+  renderPortfolioStats();
+}
+
+function drawEquitySpark(){
+  const c = document.getElementById('equity-spark');
+  if(!c) return;
+  const dpr = window.devicePixelRatio || 1;
+  const cssW = c.clientWidth || 600;
+  const cssH = 120;
+  if(c.width !== cssW*dpr || c.height !== cssH*dpr){
+    c.width = cssW*dpr; c.height = cssH*dpr;
+  }
+  const ctx = c.getContext('2d');
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  ctx.clearRect(0,0,cssW,cssH);
+  if(equityHistory.length < 2){
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.font = '11px ui-sans-serif, system-ui';
+    ctx.fillText('Equity history will draw here once you start trading…', 12, cssH/2);
+    return;
+  }
+  const eqs = equityHistory.map(p=>p.equity);
+  const min = Math.min(STARTING_EQUITY, ...eqs);
+  const max = Math.max(STARTING_EQUITY, ...eqs);
+  const range = (max-min) || 1;
+  const padX = 8, padY = 12;
+  const W = cssW - padX*2, H = cssH - padY*2;
+  // baseline (starting equity)
+  const baselineY = padY + H - ((STARTING_EQUITY - min)/range) * H;
+  ctx.strokeStyle = 'rgba(255,255,255,0.10)';
+  ctx.setLineDash([3,4]);
+  ctx.beginPath(); ctx.moveTo(padX, baselineY); ctx.lineTo(padX+W, baselineY); ctx.stroke();
+  ctx.setLineDash([]);
+  // line + fill
+  const lastEq = eqs[eqs.length-1];
+  const up = lastEq >= STARTING_EQUITY;
+  const stroke = up ? '#10e39b' : '#ff4f70';
+  const fill1  = up ? 'rgba(16,227,155,0.28)' : 'rgba(255,79,112,0.28)';
+  const fill2  = 'rgba(0,0,0,0)';
+  ctx.beginPath();
+  eqs.forEach((y, i) => {
+    const px = padX + (i/(eqs.length-1)) * W;
+    const py = padY + H - ((y-min)/range) * H;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  });
+  ctx.lineTo(padX+W, padY+H);
+  ctx.lineTo(padX, padY+H);
+  ctx.closePath();
+  const grad = ctx.createLinearGradient(0, padY, 0, padY+H);
+  grad.addColorStop(0, fill1); grad.addColorStop(1, fill2);
+  ctx.fillStyle = grad; ctx.fill();
+  // line
+  ctx.beginPath();
+  eqs.forEach((y, i) => {
+    const px = padX + (i/(eqs.length-1)) * W;
+    const py = padY + H - ((y-min)/range) * H;
+    if(i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
+  });
+  ctx.lineWidth = 2; ctx.strokeStyle = stroke; ctx.stroke();
+  // last dot
+  const lastX = padX + W;
+  const lastY = padY + H - ((lastEq-min)/range) * H;
+  ctx.beginPath(); ctx.arc(lastX,lastY,3.5,0,Math.PI*2);
+  ctx.fillStyle = stroke; ctx.fill();
+}
+
+function renderPortfolioStats(){
+  const equity = state.balance + state.pnl;
+  const dailyPnL = equity - STARTING_EQUITY;
+  const dailyPct = (dailyPnL / STARTING_EQUITY) * 100;
+  const set = (id,val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  set('pec-equity', fmtINR(equity));
+  set('pec-pnl', (dailyPnL>=0?'+':'') + fmtINR(dailyPnL));
+  set('pec-pnl-pct', (dailyPct>=0?'+':'') + dailyPct.toFixed(2) + '%');
+  set('pec-samples', equityHistory.length);
+  const pill = document.getElementById('pec-pnl-pill');
+  if(pill){
+    pill.classList.toggle('profit', dailyPnL > 0.5);
+    pill.classList.toggle('loss', dailyPnL < -0.5);
+  }
+  // Trade-based stats
+  const orders = state.orders;
+  const wins = orders.filter(o=>o.pnl>=0).length;
+  const losses = orders.length - wins;
+  const winRate = orders.length ? Math.round((wins/orders.length)*100) + '%' : '—';
+  let best = null, worst = null;
+  orders.forEach(o => {
+    if(best === null || o.pnl > best) best = o.pnl;
+    if(worst === null || o.pnl < worst) worst = o.pnl;
+  });
+  set('ps-trades', orders.length);
+  set('ps-winrate', winRate);
+  set('ps-wins', wins);
+  set('ps-losses', losses);
+  set('ps-best', best===null ? '—' : fmtINR(best));
+  set('ps-worst', worst===null ? '—' : fmtINR(worst));
+  // Anchor info
+  const anchor = document.getElementById('pec-anchor');
+  if(anchor) anchor.textContent = pbState.anchorDate || new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short'});
+  // Trade history table
+  const ph = document.getElementById('ph-body');
+  const phc = document.getElementById('ph-count');
+  if(phc) phc.textContent = orders.length + ' trades';
+  if(ph){
+    if(!orders.length){
+      ph.innerHTML = `<tr><td class="empty" colspan="7">Your closed trades will appear here.</td></tr>`;
+    } else {
+      ph.innerHTML = orders.map(o=>{
+        const c = cur(o.sym);
+        return `<tr>
+          <td><small style="font-family:var(--mono);">${o.at}</small></td>
+          <td><b>${o.sym}</b></td>
+          <td class="pos-${o.side}">${o.side==='buy'?'BUY':'SELL'}</td>
+          <td>${fmtUSD(o.size)}</td>
+          <td>${c}${fmt(o.entry)}</td>
+          <td>${c}${fmt(o.exit)}</td>
+          <td class="pos-pnl ${o.pnl>=0?'up':'down'}">${o.pnl>=0?'+':''}${fmtUSD(o.pnl)}</td>
+        </tr>`;
+      }).join('');
+    }
+  }
+}
+
+/* ── XP / Level / Achievements / Daily challenge ─────────────── */
+const XP_KEY = 'pb-game-state';
+const ACHIEVEMENTS = [
+  { id:'first_trade',  icon:'🎯', name:'First trade',     test: g => g.totalTrades >= 1 },
+  { id:'win_streak3',  icon:'🔥', name:'3-streak',         test: g => g.bestStreak >= 3 },
+  { id:'profit_10k',   icon:'💰', name:'₹10K profit',      test: g => g.bestSession >= 10000 },
+  { id:'volume_100k',  icon:'📊', name:'₹1L volume',       test: g => g.totalVolume >= 100000 },
+  { id:'level5',       icon:'⭐', name:'Level 5',          test: g => g.level >= 5 },
+  { id:'level10',      icon:'👑', name:'Level 10',         test: g => g.level >= 10 },
+  { id:'twenty_wins',  icon:'🏆', name:'20 wins',          test: g => g.totalWins >= 20 },
+  { id:'comeback',     icon:'⚡', name:'Comeback (recover from -₹5K)', test: g => g.didComeback },
+];
+const RANKS = [
+  {min:0,    title:'Rookie Trader'},
+  {min:100,  title:'Apprentice'},
+  {min:300,  title:'Day Trader'},
+  {min:700,  title:'Swing Pro'},
+  {min:1500, title:'Quant'},
+  {min:3000, title:'Market Maker'},
+  {min:6000, title:'Whale'},
+  {min:12000,title:'Legend'},
+];
+function rankFor(xp){
+  let r = RANKS[0];
+  for(const x of RANKS){ if(xp >= x.min) r = x; }
+  return r;
+}
+function xpForLevel(lvl){ return Math.round(100 * Math.pow(lvl, 1.4)); } // L1=100, L2=264, L3=465, …
+function gameLoad(){
+  try {
+    const raw = localStorage.getItem(XP_KEY);
+    if(raw) return Object.assign(gameDefault(), JSON.parse(raw));
+  } catch(_){}
+  return gameDefault();
+}
+function gameDefault(){
+  return {
+    xp: 0, level: 1, totalTrades: 0, totalWins: 0, totalVolume: 0,
+    bestStreak: 0, currentStreak: 0, bestSession: 0, didComeback: false,
+    minSession: 0, achievements: [],
+    dailyId: dailyChallengeId(), dailyProgress: 0, dailyDoneOn: null,
+  };
+}
+function gameSave(){ try { localStorage.setItem(XP_KEY, JSON.stringify(pbGame)); } catch(_){} }
+
+const DAILY_CHALLENGES = [
+  { id:'profit_500',  text:'Lock in ₹500 in profit today',     target:500,  unit:'inr', kind:'profit', reward:50 },
+  { id:'profit_2k',   text:'Make ₹2,000 in realised P&L',      target:2000, unit:'inr', kind:'profit', reward:100 },
+  { id:'trades_5',    text:'Close 5 trades today',             target:5,    unit:'count', kind:'trades', reward:60 },
+  { id:'win_3',       text:'Win 3 trades in a row',            target:3,    unit:'count', kind:'streak', reward:80 },
+  { id:'volume_50k',  text:'Trade ₹50,000 in total volume',    target:50000,unit:'inr', kind:'volume',  reward:75 },
+];
+function dailyChallengeId(){
+  // Deterministic per-day pick
+  const d = new Date();
+  const seed = parseInt(d.getFullYear() + '' + (d.getMonth()+1).toString().padStart(2,'0') + d.getDate().toString().padStart(2,'0'), 10);
+  return DAILY_CHALLENGES[seed % DAILY_CHALLENGES.length].id;
+}
+function getDailyChallenge(){
+  return DAILY_CHALLENGES.find(d => d.id === pbGame.dailyId) || DAILY_CHALLENGES[0];
+}
+
+let pbGame = gameLoad();
+
+function pbAddXP_real(amount, reason){
+  pbGame.xp += amount;
+  // Level-up loop
+  while(pbGame.xp >= xpForLevel(pbGame.level)){
+    pbGame.xp -= xpForLevel(pbGame.level);
+    pbGame.level += 1;
+    showXPToast(`Level ${pbGame.level} unlocked!`, true);
+    pbBeep('win');
+  }
+  showXPToast(`+${amount} XP · ${reason}`);
+  renderGameUI();
+  gameSave();
+  checkAchievements();
+}
+pbAddXP = pbAddXP_real; // override the stub from earlier
+
+function showXPToast(text, big=false){
+  const el = document.createElement('div');
+  el.className = 'xp-toast';
+  if(big) el.style.fontSize = '15px';
+  el.textContent = text;
+  document.body.appendChild(el);
+  setTimeout(()=>el.remove(), 2400);
+}
+
+function recordClosedTrade(order){
+  pbGame.totalTrades += 1;
+  pbGame.totalVolume += order.size;
+  if(order.pnl >= 0){
+    pbGame.totalWins += 1;
+    pbGame.currentStreak += 1;
+    if(pbGame.currentStreak > pbGame.bestStreak) pbGame.bestStreak = pbGame.currentStreak;
+  } else {
+    pbGame.currentStreak = 0;
+  }
+  // Best/worst session-equity tracking
+  const equity = state.balance + state.pnl;
+  const sessionPnL = equity - STARTING_EQUITY;
+  if(sessionPnL > pbGame.bestSession) pbGame.bestSession = sessionPnL;
+  if(sessionPnL < pbGame.minSession) pbGame.minSession = sessionPnL;
+  if(pbGame.minSession <= -5000 && sessionPnL >= 0) pbGame.didComeback = true;
+
+  // Daily challenge progress
+  const dc = getDailyChallenge();
+  if(pbGame.dailyDoneOn !== todayKey()){
+    if(dc.kind === 'profit'){
+      const realised = state.orders.reduce((a,o)=>a+o.pnl, 0);
+      pbGame.dailyProgress = Math.max(0, realised);
+    } else if(dc.kind === 'trades'){
+      pbGame.dailyProgress = pbGame.totalTrades;
+    } else if(dc.kind === 'streak'){
+      pbGame.dailyProgress = pbGame.currentStreak;
+    } else if(dc.kind === 'volume'){
+      pbGame.dailyProgress = pbGame.totalVolume;
+    }
+    if(pbGame.dailyProgress >= dc.target){
+      pbGame.dailyDoneOn = todayKey();
+      pbAddXP(dc.reward, 'Daily challenge complete!');
+      toast(`🎯 Daily challenge done · +${dc.reward} XP`, 'success');
+    }
+  }
+
+  // XP for the trade
+  const baseXp = 8;
+  const bonusXp = order.pnl > 0 ? Math.min(50, Math.round(order.pnl/200)) : 0;
+  pbAddXP(baseXp + bonusXp, order.pnl >= 0 ? 'Profitable close' : 'Closed trade');
+  gameSave();
+  // Refresh dashboard immediately
+  if(typeof renderPortfolioStats === 'function') renderPortfolioStats();
+  if(typeof pushEquitySample === 'function') pushEquitySample();
+}
+
+function todayKey(){
+  const d = new Date();
+  return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate();
+}
+
+function checkAchievements(){
+  let unlocked = false;
+  ACHIEVEMENTS.forEach(a => {
+    if(!pbGame.achievements.includes(a.id) && a.test(pbGame)){
+      pbGame.achievements.push(a.id);
+      unlocked = true;
+      toast(`🏅 Achievement unlocked: ${a.name}`, 'success');
+      pbBeep('win');
+      pbAddXP(40, `Unlocked "${a.name}"`);
+    }
+  });
+  if(unlocked){ gameSave(); renderAchievements(); }
+}
+
+function renderGameUI(){
+  const set = (id,v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  set('xp-level', pbGame.level);
+  set('xp-cur', pbGame.xp);
+  set('xp-max', xpForLevel(pbGame.level));
+  set('xp-title', rankFor((pbGame.level-1)*200 + pbGame.xp).title);
+  const fill = document.getElementById('xp-fill');
+  if(fill){
+    const pct = Math.min(100, (pbGame.xp / xpForLevel(pbGame.level)) * 100);
+    fill.style.width = pct + '%';
+  }
+  // Daily challenge
+  const dc = getDailyChallenge();
+  const dt = document.getElementById('dc-text');
+  const dr = document.getElementById('dc-reward');
+  const df = document.getElementById('dc-fill');
+  const dm = document.getElementById('dc-meta');
+  const card = document.querySelector('.challenge-card');
+  if(dt) dt.textContent = dc.text;
+  if(dr) dr.textContent = '+' + dc.reward + ' XP';
+  const done = pbGame.dailyDoneOn === todayKey();
+  let prog = pbGame.dailyProgress || 0;
+  // Recompute live progress from current state (cheap)
+  if(dc.kind === 'profit')      prog = Math.max(0, state.orders.reduce((a,o)=>a+o.pnl, 0));
+  else if(dc.kind === 'trades') prog = pbGame.totalTrades;
+  else if(dc.kind === 'streak') prog = pbGame.currentStreak;
+  else if(dc.kind === 'volume') prog = pbGame.totalVolume;
+  const pct = Math.min(100, (prog/dc.target)*100);
+  if(df) df.style.width = pct + '%';
+  if(dm){
+    if(dc.unit === 'inr') dm.textContent = `${fmtINR(prog)} / ${fmtINR(dc.target)}`;
+    else                  dm.textContent = `${prog} / ${dc.target}`;
+  }
+  if(card) card.classList.toggle('dc-done', done);
+  // Achievements
+  renderAchievements();
+}
+
+function renderAchievements(){
+  const grid = document.getElementById('ach-grid');
+  const cnt  = document.getElementById('ach-count');
+  if(!grid) return;
+  grid.innerHTML = ACHIEVEMENTS.map(a => {
+    const got = pbGame.achievements.includes(a.id);
+    return `<div class="ach ${got?'unlocked':''}" title="${a.name}">
+      <span class="ach-icon">${a.icon}</span>
+      <span class="ach-name">${a.name}</span>
+    </div>`;
+  }).join('');
+  if(cnt) cnt.textContent = pbGame.achievements.length + '/' + ACHIEVEMENTS.length;
+}
+
+/* ── AI traders ──────────────────────────────────────────────── */
+const AI_BOTS = [
+  {name:'AlphaBot',   style:'aggressive', avg: 0,   trades: 0, wins: 0},
+  {name:'NiftyNinja', style:'momentum',   avg: 0,   trades: 0, wins: 0},
+  {name:'BetaBeast',  style:'meanrev',    avg: 0,   trades: 0, wins: 0},
+  {name:'RupeeRover', style:'scalper',    avg: 0,   trades: 0, wins: 0},
+  {name:'SwingShark', style:'swing',      avg: 0,   trades: 0, wins: 0},
+];
+function tickBots(){
+  AI_BOTS.forEach(b => {
+    // Style-driven random PnL with bias
+    let bias = 0;
+    if(b.style==='aggressive') bias = (Math.random()-0.46) * 220;
+    if(b.style==='momentum')   bias = (Math.random()-0.45) * 160;
+    if(b.style==='meanrev')    bias = (Math.random()-0.5)  * 110;
+    if(b.style==='scalper')    bias = (Math.random()-0.49) * 60;
+    if(b.style==='swing')      bias = (Math.random()-0.47) * 200;
+    if(pbState.crashUntil && Date.now() < pbState.crashUntil){
+      bias *= 2.4 - Math.random();
+    }
+    b.avg += bias;
+    b.trades += Math.random() < 0.6 ? 1 : 0;
+    if(bias > 0) b.wins += Math.random() < 0.55 ? 1 : 0;
+  });
+  renderBots();
+}
+function renderBots(){
+  const list = document.getElementById('bots-list');
+  if(!list) return;
+  // Insert player synthetic row
+  const equity = state.balance + state.pnl;
+  const playerPnL = equity - STARTING_EQUITY;
+  const all = [
+    ...AI_BOTS.map(b => ({name:b.name, sub:b.style, pnl:b.avg, trades:b.trades, isYou:false})),
+    {name:'You', sub:'live', pnl:playerPnL, trades:state.orders.length, isYou:true}
+  ];
+  all.sort((a,b)=>b.pnl-a.pnl);
+  list.innerHTML = all.map((b,i)=>{
+    const goldClass = i === 0 ? 'gold' : '';
+    const sign = b.pnl >= 0 ? '+' : '';
+    const cls  = b.pnl >= 0 ? 'up' : 'down';
+    const youStyle = b.isYou ? 'background:rgba(124,58,237,0.16);border-color:rgba(124,58,237,0.5);' : '';
+    return `<div class="bot-row" style="${youStyle}">
+      <span class="bot-rank ${goldClass}">#${i+1}</span>
+      <span class="bot-name">${b.isYou?'<b>You</b>':b.name}<small>${b.sub}</small></span>
+      <span class="bot-pnl ${cls}">${sign}${fmtINR(b.pnl)}</span>
+      <span class="bot-trades">${b.trades}t</span>
+    </div>`;
+  }).join('');
+}
+
+/* ── News feed ──────────────────────────────────────────────── */
+const NEWS_TEMPLATES = [
+  { sym:'RELIANCE',  bull:true,  head:'Reliance reports record quarterly revenue', body:'JIO subscriber base hits new high; retail margins expand.' },
+  { sym:'RELIANCE',  bull:false, head:'Reliance hit by oil-import duty hike',       body:'Refining margin compression flagged by analysts.' },
+  { sym:'TCS',       bull:true,  head:'TCS bags ₹15,000Cr deal with European bank', body:'5-year multi-cloud transformation contract.' },
+  { sym:'TCS',       bull:false, head:'TCS warns on Q4 IT-spend slowdown',          body:'Discretionary deals delayed in BFSI vertical.' },
+  { sym:'INFY',      bull:true,  head:'Infosys lifts FY guidance',                  body:'Cost optimisation deals win share from rivals.' },
+  { sym:'INFY',      bull:false, head:'Infosys: senior leadership exits',           body:'Three EVPs depart; succession concerns.' },
+  { sym:'HDFCBANK',  bull:true,  head:'HDFC Bank loan growth beats estimates',      body:'Credit cards + retail mortgages strong.' },
+  { sym:'HDFCBANK',  bull:false, head:'HDFC Bank: NIM contraction larger than expected', body:'Deposit cost pressure persists.' },
+  { sym:'NIFTY',     bull:true,  head:'RBI holds rates; cuts inflation forecast',   body:'Liquidity additions boost rate-sensitive sectors.' },
+  { sym:'NIFTY',     bull:false, head:'FII outflow accelerates on rupee weakness',  body:'Profit-taking ahead of US Fed decision.' },
+  { sym:'ITC',       bull:true,  head:'ITC FMCG margins expand on input cost ease', body:'Cigarettes volume growth steady.' },
+  { sym:'TATASTEEL', bull:false, head:'Steel prices fall on China demand worries',  body:'Tata Steel may guide softer realisations.' },
+  { sym:'BTCUSD',    bull:true,  head:'BTC ETF sees record inflow',                 body:'Institutional demand resumes; supply tight.' },
+  { sym:'BTCUSD',    bull:false, head:'BTC: regulatory uncertainty in Asia',        body:'Hong Kong delays ETF approvals.' },
+];
+function fireNewsEvent(){
+  const ev = NEWS_TEMPLATES[Math.floor(Math.random()*NEWS_TEMPLATES.length)];
+  const inst = state.instruments.find(i=>i.sym === ev.sym);
+  if(inst){
+    // Move price 0.6%–2.5%
+    const delta = (0.006 + Math.random()*0.019) * (ev.bull ? 1 : -1);
+    inst.price = Math.max(0.0001, inst.price * (1 + delta));
+    if(state.activeSym === inst.sym) updatePriceHeader();
+  }
+  pbState.newsEvents.unshift({...ev, t: Date.now()});
+  if(pbState.newsEvents.length > 30) pbState.newsEvents.pop();
+  renderNews();
+}
+function renderNews(){
+  const list = document.getElementById('news-list');
+  const cnt = document.getElementById('news-count');
+  if(!list) return;
+  if(cnt) cnt.textContent = pbState.newsEvents.length + ' events';
+  if(!pbState.newsEvents.length){
+    list.innerHTML = `<div class="news-empty">News events will appear here as the simulated market moves.</div>`;
+    return;
+  }
+  list.innerHTML = pbState.newsEvents.slice(0,10).map(n=>{
+    const ago = Math.floor((Date.now()-n.t)/1000);
+    const agoStr = ago < 60 ? ago+'s ago' : Math.floor(ago/60)+'m ago';
+    return `<div class="news-item ${n.bull?'bull':'bear'}">
+      <div class="nh">${n.bull?'▲':'▼'} ${n.sym}: ${n.head}</div>
+      <div>${n.body}</div>
+      <div class="nm">${agoStr}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ── Crash mode ─────────────────────────────────────────────── */
+function triggerCrash(){
+  pbState.crashUntil = Date.now() + 30*1000;
+  const pill = document.getElementById('mode-pill');
+  if(pill){ pill.textContent = '⚡ CRASH'; pill.classList.add('crash'); }
+  toast('⚡ Crash mode engaged · 30s of extreme volatility', 'error');
+  pbBeep('loss');
+  // Hard down-shock to all symbols
+  state.instruments.forEach(i => {
+    const shock = (Math.random()*0.04 + 0.02) * (Math.random() < 0.85 ? -1 : 1);
+    i.price = Math.max(0.0001, i.price * (1 + shock));
+  });
+  if(arenaData) regenerateArenaData();
+  setTimeout(() => {
+    pbState.crashUntil = 0;
+    if(pill){ pill.textContent = 'Normal'; pill.classList.remove('crash'); }
+    toast('Crash mode ended', 'success');
+  }, 30*1000);
+}
+
+/* ── Simulation orchestrator ─────────────────────────────────── */
+const pbState = {
+  newsEvents: [],
+  crashUntil: 0,
+  anchorDate: new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'}),
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  const btn = document.getElementById('btn-crash');
+  if(btn) btn.addEventListener('click', triggerCrash);
+});
+
+/* recordClosedTrade is invoked directly from closePosition / closeAllPositions
+   in the original handlers above (typeof check makes it safe at boot time). */
+
+/* ── Anchored simulation: pull real opening prices from backend (graceful fallback) ─ */
+async function pbFetchAnchors(){
+  try {
+    const r = await fetch(PB_API_BASE + '/api/anchors');
+    if(!r.ok) return;
+    const data = await r.json();
+    if(data && data.prices && typeof data.prices === 'object'){
+      let changed = 0;
+      state.instruments.forEach(i => {
+        if(data.prices[i.sym] && data.prices[i.sym] > 0){
+          i.price = data.prices[i.sym];
+          changed++;
+        }
+      });
+      if(data.date) pbState.anchorDate = data.date;
+      if(changed){
+        const inst = state.instruments.find(i=>i.sym===state.activeSym);
+        if(inst) regenerateArenaData();
+        renderTicker();
+        renderList(document.querySelector('.list-tab.active')?.dataset.cat || 'in', '');
+      }
+    }
+  } catch(_){ /* offline fallback */ }
+}
+
+/* Start periodic timers AFTER chart init below */
+
+/* ══════════════════════════════════════════════════════════════
    Init
    ══════════════════════════════════════════════════════════════ */
 initHeroChart();
@@ -2463,6 +3359,33 @@ renderBalancePane();
 updateDepth(true);
 // Refresh depth at a visible cadence even when no tick has happened yet
 setInterval(()=>{ if(document.querySelector('.term-pane.active')?.dataset.pane==='depth') updateDepth(); }, 1500);
+
+/* Phase 5/6/7 — first render + recurring timers */
+renderGameUI();
+renderPortfolioStats();
+drawEquitySpark();
+renderBots();
+renderNews();
+window.addEventListener('resize', () => drawEquitySpark());
+// Equity sample every 3s (gives us a smooth sparkline without spamming)
+setInterval(pushEquitySample, 3000);
+// AI bots tick every 4s
+setInterval(tickBots, 4000);
+// Random news every 18-32s
+function scheduleNews(){
+  const delay = 18000 + Math.random()*14000;
+  setTimeout(() => {
+    fireNewsEvent();
+    if(Math.random() < 0.06) triggerCrash(); // 6% chance of crash on a news event
+    scheduleNews();
+  }, delay);
+}
+scheduleNews();
+// Refresh news "X ago" labels every 15s
+setInterval(renderNews, 15000);
+// Pull anchor prices once at boot, then daily
+pbFetchAnchors();
+setInterval(pbFetchAnchors, 6 * 60 * 60 * 1000);
 
 /* Supabase session + live data */
 pbInit();
