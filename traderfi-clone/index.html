@@ -1103,23 +1103,31 @@ body{
 }
 .mob-nav-grid{
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 4px;
-  max-width: 460px;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 2px;
+  max-width: 520px;
   margin: 0 auto;
 }
 .mob-nav-btn{
   display: flex; flex-direction: column; align-items: center; gap: 3px;
-  padding: 8px 4px;
+  padding: 8px 2px;
   min-height: 52px;
   border-radius: 12px;
   background: transparent;
   color: var(--t3);
-  font-size: 10.5px;
+  font-size: 10px;
   font-weight: 600;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
   transition: color .2s ease, background .2s ease, transform .15s ease;
   -webkit-tap-highlight-color: transparent;
+  position: relative;
+  overflow: hidden;
+  border: 0;
+  cursor: pointer;
+}
+.mob-nav-btn span{
+  font-size: 10px;
+  white-space: nowrap;
 }
 .mob-nav-btn svg{
   width: 22px; height: 22px;
@@ -1269,6 +1277,155 @@ body{
 @media (max-width: 900px){
   .nav-links{ display: none; }
 }
+
+/* ══════════════════════════════════════════════════════════════════════
+   Mobile premium polish: ripple, overflow guard, chart bleed, transitions
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* Material-style ripple (works on any element with .ripple) */
+.ripple{ position: relative; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+.ripple .rip{
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: rgba(255,255,255,0.35);
+  transform: scale(0); opacity: 0.55;
+  animation: rip-anim .55s cubic-bezier(.2,.8,.2,1) forwards;
+  mix-blend-mode: screen;
+}
+@keyframes rip-anim{
+  to{ transform: scale(2.6); opacity: 0; }
+}
+
+/* Page-transition fade when navigating via bottom nav */
+.mob-page-transition{
+  opacity: 0;
+  transition: opacity .22s ease-out;
+}
+
+/* iOS dynamic viewport height (where supported) */
+@supports (height: 100dvh){
+  .full-vh{ min-height: 100dvh; }
+}
+
+/* ─── Global horizontal-overflow guard on mobile ─── */
+@media (max-width: 720px){
+  html, body{
+    max-width: 100vw;
+    overflow-x: hidden;
+  }
+  .wrap{ max-width: 100vw; padding-left: 16px; padding-right: 16px; }
+  .hero2-grid, .hero-grid, .feat-row, .game-row, .market-row, .tourn-grid, .port-top, .arena-body, .bal-grid, .foot-grid{
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+  }
+  /* Hero stats: 3 tiny cards → keep 3 columns but compact */
+  .hero-stats{
+    grid-template-columns: repeat(3, 1fr) !important;
+    gap: 10px !important;
+    max-width: 100% !important;
+  }
+  .hero-stats > *{
+    padding: 10px 8px !important;
+    min-width: 0;
+  }
+  .hero-stats b{
+    font-size: 14px !important;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+  .hero-stats small{
+    font-size: 9px !important;
+    letter-spacing: 0.08em !important;
+  }
+  .hero2-card, .feat-card, .game-card, .arena-chart, .arena-list, .arena-ticket, .pnl-card, .ps-card{
+    min-width: 0;
+  }
+  /* Long words wrap rather than overflow */
+  h1, h2, h3, p, b, span, a{ overflow-wrap: anywhere; }
+  /* Make hero CTAs stack tidily */
+  .hero2-ctas, .hero-ctas{ flex-wrap: wrap; gap: 10px; }
+  .hero2-ctas > *, .hero-ctas > *{ flex: 1 1 auto; }
+  /* Keep buttons from forcing horizontal scroll */
+  button, .btn{ max-width: 100%; }
+}
+
+/* ─── Chart full-bleed on mobile + good touch behavior ─── */
+@media (max-width: 720px){
+  .arena-chart{
+    margin-left: -16px;
+    margin-right: -16px;
+    border-radius: 0;
+    min-height: 320px;
+  }
+  .arena-chart, .arena-chart canvas, .tv-lightweight-charts, #pb-chart{
+    touch-action: pan-y pinch-zoom !important;
+  }
+  /* Compact arena head so chart gets more vertical space */
+  .arena-head{ padding: 10px 14px; }
+
+  /* Hero2 marquee card adapts to narrow widths */
+  .hero2-card{ padding: 16px !important; }
+  .hero2-card .h-row{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+  .hero2-card .h-tf{
+    overflow-x: auto;
+    scrollbar-width: none;
+    max-width: 100%;
+    flex-wrap: nowrap;
+  }
+  .hero2-card .h-tf::-webkit-scrollbar{ display: none; }
+  .hero2-card .h-tf button{ flex: 0 0 auto; }
+  .hero2-card .h-price .p{ font-size: 24px; }
+  .hero2-card .h-foot{
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+  .hero2-card .h-foot > div{ padding: 8px 10px; }
+  .hero2-card .h-chart{ height: 160px; }
+}
+
+/* ─── Compact mobile balance pill in header ─── */
+.mob-balance-pill{ display: none; }
+@media (max-width: 720px){
+  .mob-balance-pill{
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, rgba(34,211,238,0.15), rgba(168,85,247,0.15));
+    border: 1px solid var(--border-2);
+    font-family: var(--mono);
+    font-size: 10.5px;
+    line-height: 1;
+    font-weight: 700;
+    color: var(--t1);
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+    margin-left: 4px;
+    max-width: 50vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .mob-balance-pill .lbl{
+    color: var(--c1);
+    font-weight: 700;
+    font-size: 8.5px;
+    letter-spacing: 0.12em;
+  }
+}
+
+/* ─── Smoother momentum scroll on iOS ─── */
+@media (max-width: 720px){
+  body{ -webkit-overflow-scrolling: touch; }
+}
+
+/* ─── Reduce ambient orb intensity on mobile (perf) ─── */
+@media (max-width: 720px){
+  .ambient .orb{ filter: blur(60px); opacity: 0.3; }
+}
 </style>
 </head>
 <body>
@@ -1305,6 +1462,10 @@ body{
         <a href="#how" role="menuitem">How it works</a>
       </div>
       <div class="nav-spacer"></div>
+      <span class="mob-balance-pill" id="mob-balance-pill" aria-live="polite" title="Virtual balance">
+        <span class="lbl">BAL</span>
+        <span id="mob-balance-amount">₹1,00,000</span>
+      </span>
       <div class="nav-live" aria-live="polite">
         <span class="dot"></span>
         <div><b id="live-players">—</b> <small>players</small></div>
@@ -1738,8 +1899,8 @@ body{
 
       <!-- Sticky buy/sell bar (mobile only — sits above bottom nav) -->
       <div class="mob-sticky-trade" aria-hidden="false">
-        <button class="buy" id="mob-quick-buy" type="button">BUY</button>
-        <button class="sell" id="mob-quick-sell" type="button">SELL</button>
+        <button class="buy ripple" id="mob-quick-buy" type="button">BUY</button>
+        <button class="sell ripple" id="mob-quick-sell" type="button">SELL</button>
       </div>
     </div>
   </div>
@@ -1785,7 +1946,7 @@ body{
     </div>
 
     <!-- Gamification row: XP + daily challenge + achievements -->
-    <div class="game-row">
+    <div class="game-row" id="challenges">
       <div class="game-card xp-card">
         <div class="gc-head">
           <span class="gc-eyebrow">Level</span>
@@ -2072,22 +2233,26 @@ body{
 <!-- Toasts -->
 <div class="toast-wrap" id="toast-wrap" aria-live="polite"></div>
 
-<!-- ══════════ Mobile bottom nav ══════════ -->
+<!-- ══════════ Mobile bottom nav (5 tabs) ══════════ -->
 <nav class="mob-nav" id="mob-nav" aria-label="Mobile navigation">
   <div class="mob-nav-grid">
-    <button class="mob-nav-btn active" data-mob-target="arena" type="button">
-      <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
-      <span>Trade</span>
+    <button class="mob-nav-btn active ripple" data-mob-target="hero2" type="button" aria-label="Home">
+      <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/></svg>
+      <span>Home</span>
     </button>
-    <button class="mob-nav-btn" data-mob-target="tournaments" type="button">
-      <svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 4h3v3a3 3 0 0 1-3 3"/><path d="M7 4H4v3a3 3 0 0 0 3 3"/></svg>
+    <button class="mob-nav-btn ripple" data-mob-target="arena" type="button" aria-label="Markets">
+      <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
       <span>Markets</span>
     </button>
-    <button class="mob-nav-btn" data-mob-target="portfolio" type="button">
-      <svg viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0z"/><path d="M12 3v9l5 3"/></svg>
+    <button class="mob-nav-btn ripple" data-mob-target="portfolio" type="button" aria-label="Portfolio">
+      <svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>
       <span>Portfolio</span>
     </button>
-    <button class="mob-nav-btn" data-mob-target="leaderboard" type="button">
+    <button class="mob-nav-btn ripple" data-mob-target="challenges" type="button" aria-label="Challenges">
+      <svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 4h3v3a3 3 0 0 1-3 3"/><path d="M7 4H4v3a3 3 0 0 0 3 3"/></svg>
+      <span>Challenges</span>
+    </button>
+    <button class="mob-nav-btn ripple" data-mob-target="leaderboard" type="button" aria-label="Profile">
       <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>
       <span>Profile</span>
     </button>
@@ -2095,7 +2260,7 @@ body{
 </nav>
 
 <!-- ══════════ Mobile FAB Buy/Sell ══════════ -->
-<button class="mob-fab" id="mob-fab" type="button" aria-label="Quick Buy / Sell">
+<button class="mob-fab ripple" id="mob-fab" type="button" aria-label="Quick trade">
   <svg viewBox="0 0 24 24"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg>
 </button>
 
@@ -2152,7 +2317,12 @@ body{
 
   let parts = [];
   function spawn(){
-    const n = isMobile() ? 60 : 140;
+    // Lower particle count on mobile + skip entirely if Save-Data or low-end device
+    const lowEnd = (navigator.connection && (navigator.connection.saveData || /^slow-2g|2g$/.test(navigator.connection.effectiveType || '')))
+                 || ((navigator.deviceMemory || 4) <= 2)
+                 || ((navigator.hardwareConcurrency || 4) <= 2);
+    if(lowEnd){ parts = []; return; }
+    const n = isMobile() ? 28 : 140;
     parts = new Array(n).fill(0).map(() => {
       const c = palette[(Math.random() * palette.length) | 0];
       return {
@@ -4155,6 +4325,11 @@ function renderPortfolioStats(){
   set('pec-equity', fmtINR(equity));
   set('pec-pnl', (dailyPnL>=0?'+':'') + fmtINR(dailyPnL));
   set('pec-pnl-pct', (dailyPct>=0?'+':'') + dailyPct.toFixed(2) + '%');
+  // Update sticky mobile balance pill in header — round integer for compactness
+  try {
+    const intStr = fmtINR(Math.round(equity)).replace(/\.\d+$/, '');
+    set('mob-balance-amount', intStr);
+  } catch { set('mob-balance-amount', fmtINR(equity)); }
   set('pec-samples', equityHistory.length);
   const pill = document.getElementById('pec-pnl-pill');
   if(pill){
@@ -4635,22 +4810,53 @@ setInterval(pbFetchAnchors, 6 * 60 * 60 * 1000);
   }
   window.pbHaptic = haptic;
 
-  /* Bottom nav: tap → scroll to section, IO → highlight active */
+  /* Material-style ripple on any .ripple element */
+  function spawnRipple(host, e){
+    const rect = host.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+    const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+    const r = document.createElement('span');
+    r.className = 'rip';
+    r.style.width = r.style.height = size + 'px';
+    r.style.left = (x - size/2) + 'px';
+    r.style.top  = (y - size/2) + 'px';
+    host.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  }
+  document.addEventListener('pointerdown', (e) => {
+    const host = e.target.closest && e.target.closest('.ripple');
+    if(!host) return;
+    spawnRipple(host, e);
+  }, { passive: true });
+
+  /* Bottom nav: tap → scroll to section + subtle fade transition + active state */
   const navBtns = document.querySelectorAll('.mob-nav-btn');
+  const mainContent = document.querySelector('main') || document.body;
   navBtns.forEach(btn => {
     btn.addEventListener('click', () => {
       const tgt = btn.dataset.mobTarget;
       const el = document.getElementById(tgt);
-      if(el){
-        haptic(8);
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
       navBtns.forEach(b => b.classList.toggle('active', b === btn));
+      haptic(8);
+      // brief fade for page-transition feel
+      try {
+        document.body.classList.add('mob-page-transition');
+        setTimeout(() => document.body.classList.remove('mob-page-transition'), 240);
+      } catch {}
+      if(el){
+        // Scroll into view; for hero2 (Home) go to very top instead
+        if(tgt === 'hero2'){
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      }
     });
   });
 
   if('IntersectionObserver' in window){
-    const targets = ['arena','tournaments','portfolio','leaderboard']
+    const targets = ['hero2','arena','portfolio','challenges','leaderboard']
       .map(id => document.getElementById(id))
       .filter(Boolean);
     const navByTarget = {};

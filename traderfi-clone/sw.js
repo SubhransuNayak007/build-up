@@ -1,9 +1,9 @@
-// PitBull Markets — service worker (v4 · premium landing)
+// PitBull Markets — service worker (v7 · mobile premium polish)
 // Strategy:
 //   • Network-first for HTML (so new builds reach users without a hard refresh)
 //   • Never cache the backend API (always live counters / leaderboards)
 //   • Cache-first for static assets (icons, manifest, fonts) with background revalidation
-const CACHE = 'pitbull-v6';
+const CACHE = 'pitbull-v7';
 const STATIC_ASSETS = [
   'manifest.webmanifest',
   'icon-192.png',
